@@ -1,0 +1,1125 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>References &amp; Credits — ConnectHBG</title>
+  <meta name="description" content="Technical references, credits, and documentation for the ConnectHBG community resource hub. TSA Webmaster competition entry." />
+
+  <!-- Fonts -->
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&display=swap" rel="stylesheet" />
+
+  <!-- Tailwind CDN -->
+  <script src="https://cdn.tailwindcss.com"></script>
+
+  <!-- Leaflet Map -->
+  <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
+  <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+
+  <!-- Leaflet MarkerCluster -->
+  <link rel="stylesheet" href="https://unpkg.com/leaflet.markercluster@1.5.3/dist/MarkerCluster.css" />
+  <link rel="stylesheet" href="https://unpkg.com/leaflet.markercluster@1.5.3/dist/MarkerCluster.Default.css" />
+  <script src="https://unpkg.com/leaflet.markercluster@1.5.3/dist/leaflet.markercluster.js"></script>
+
+  <!-- Leaflet Heat -->
+  <script src="https://unpkg.com/leaflet.heat@0.2.0/dist/leaflet-heat.js"></script>
+
+  <!-- ECharts + ECharts-GL -->
+  <script src="https://cdn.jsdelivr.net/npm/echarts@5/dist/echarts.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/echarts-gl@2/dist/echarts-gl.min.js"></script>
+
+  <!-- AOS scroll animations -->
+  <link href="https://unpkg.com/aos@2.3.1/dist/aos.css" rel="stylesheet" />
+  <script src="https://unpkg.com/aos@2.3.1/dist/aos.js"></script>
+
+  <!-- Lucide Icons -->
+  <script src="https://unpkg.com/lucide@latest"></script>
+
+  <!-- Custom Styles -->
+  <link rel="stylesheet" href="styles.css" />
+
+  <script>
+    tailwind.config = {
+      theme: {
+        extend: {
+          colors: {
+            navy: { DEFAULT: '#0F172A', 800: '#1E293B', 700: '#334155', 600: '#475569' },
+            teal: { DEFAULT: '#14B8A6', light: '#5EEAD4', dark: '#0D9488' },
+            purple: { DEFAULT: '#8B5CF6', light: '#C4B5FD', dark: '#7C3AED' }
+          },
+          fontFamily: { sans: ['Inter', 'sans-serif'] }
+        }
+      }
+    }
+  </script>
+</head>
+
+<body class="font-sans bg-slate-50 text-navy antialiased" id="app-body">
+
+<!-- ═══════════════════════════════════════════════════════
+     SKIP LINK
+═══════════════════════════════════════════════════════ -->
+<a href="#main-content" class="skip-link">Skip to main content</a>
+
+<!-- ═══════════════════════════════════════════════════════
+     ACCESSIBILITY TOOLBAR
+═══════════════════════════════════════════════════════ -->
+<div id="a11y-bar" class="a11y-bar" role="toolbar" aria-label="Accessibility tools">
+  <button id="a11y-toggle-btn" class="a11y-toggle-btn" onclick="toggleA11yBar()" title="Accessibility options" aria-label="Toggle accessibility options" aria-expanded="false">
+    <span data-lucide="accessibility" class="w-5 h-5"></span>
+  </button>
+  <div id="a11y-controls" class="a11y-controls" aria-hidden="true">
+    <span class="a11y-label">Accessibility</span>
+    <button onclick="increaseFontSize()" title="Increase text size" aria-label="Increase font size">
+      <span class="font-bold text-xs">A+</span>
+    </button>
+    <button onclick="decreaseFontSize()" title="Decrease text size" aria-label="Decrease font size">
+      <span class="text-xs">A-</span>
+    </button>
+    <button onclick="toggleTTS()" title="Text to speech" id="btn-tts" aria-pressed="false">
+      <span data-lucide="volume-2" class="w-4 h-4"></span>
+    </button>
+  </div>
+</div>
+
+<!-- ═══════════════════════════════════════════════════════
+     ANNOUNCEMENT BANNER
+═══════════════════════════════════════════════════════ -->
+<div id="announcement-banner" class="announcement-banner" role="banner">
+  <div class="announcement-inner">
+    <span data-lucide="megaphone" class="w-4 h-4 flex-shrink-0"></span>
+    <div id="announcement-text" class="announcement-ticker"></div>
+  </div>
+  <button onclick="document.getElementById('announcement-banner').style.display='none'" aria-label="Dismiss announcement">
+    <span data-lucide="x" class="w-4 h-4"></span>
+  </button>
+</div>
+
+<!-- ═══════════════════════════════════════════════════════
+     NAVIGATION
+═══════════════════════════════════════════════════════ -->
+<nav id="navbar" class="navbar" role="navigation" aria-label="Main navigation">
+  <div class="nav-inner">
+    <!-- Logo -->
+    <a href="index.html" class="nav-logo" aria-label="ConnectHBG Home">
+      <div class="logo-icon">
+        <span data-lucide="map-pin" class="w-5 h-5"></span>
+      </div>
+      <span class="logo-text">Connect<span class="text-teal">HBG</span></span>
+    </a>
+
+    <!-- Desktop Nav Links -->
+    <div class="nav-links" role="list">
+      <a href="index.html#news" class="nav-link" role="listitem">News</a>
+      <a href="index.html#directory" class="nav-link" role="listitem">Directory</a>
+      <a href="index.html#calendar" class="nav-link" role="listitem">Events</a>
+      <a href="index.html#donate" class="nav-link" role="listitem">Donate</a>
+      <a href="index.html#stories" class="nav-link" role="listitem">Stories</a>
+      <a href="index.html#favorites" class="nav-link nav-link-fav" role="listitem">
+        <span data-lucide="heart" class="w-4 h-4"></span>
+        Favorites
+        <span id="fav-count-badge" class="fav-count-badge hidden">0</span>
+      </a>
+      <a href="government.html" class="nav-link" role="listitem">Government</a>
+      <a href="crisis.html" class="nav-link nav-link-crisis" role="listitem" aria-label="Crisis resources — emergency help available">Crisis</a>
+      <a href="references.html" class="nav-link nav-link-active" role="listitem" aria-current="page">References</a>
+    </div>
+
+    <!-- Nav Actions -->
+    <div class="nav-actions">
+      <button onclick="toggleDark()" class="icon-btn" title="Toggle dark mode" aria-label="Toggle dark mode" id="dark-toggle">
+        <span data-lucide="moon" class="w-5 h-5" id="dark-icon"></span>
+      </button>
+      <button onclick="startVoice()" class="icon-btn" title="Voice search" aria-label="Voice search" id="voice-btn">
+        <span data-lucide="mic" class="w-5 h-5"></span>
+      </button>
+      <button onclick="openLoginModal()" class="btn-primary-sm">
+        <span data-lucide="user" class="w-4 h-4"></span>
+        Sign In
+      </button>
+      <button id="mobile-menu-btn" class="icon-btn md:hidden" onclick="toggleMobileMenu()" aria-label="Open menu" aria-expanded="false">
+        <span data-lucide="menu" class="w-5 h-5"></span>
+      </button>
+    </div>
+  </div>
+
+  <!-- Mobile Menu -->
+  <div id="mobile-menu" class="mobile-menu hidden" role="menu">
+    <a href="index.html#news" class="mobile-link" onclick="toggleMobileMenu()">📰 News</a>
+    <a href="index.html#directory" class="mobile-link" onclick="toggleMobileMenu()">Directory</a>
+    <a href="index.html#calendar" class="mobile-link" onclick="toggleMobileMenu()">Events</a>
+    <a href="index.html#donate" class="mobile-link" onclick="toggleMobileMenu()">❤ Donate</a>
+    <a href="index.html#stories" class="mobile-link" onclick="toggleMobileMenu()">Stories</a>
+    <a href="index.html#favorites" class="mobile-link" onclick="toggleMobileMenu()">❤ Favorites</a>
+    <a href="government.html" class="mobile-link" onclick="toggleMobileMenu()">🏛 Government</a>
+    <a href="crisis.html" class="mobile-link mobile-link-crisis" onclick="toggleMobileMenu()">Crisis — Emergency Help</a>
+    <a href="references.html" class="mobile-link" onclick="toggleMobileMenu()">📋 References</a>
+    <a href="index.html#submit" class="mobile-link" onclick="toggleMobileMenu()">Submit</a>
+  </div>
+</nav>
+
+<!-- ═══════════════════════════════════════════════════════
+     MAIN CONTENT
+═══════════════════════════════════════════════════════ -->
+<main id="main-content">
+
+<!-- ───────────────────────────────────────────────────────
+     REFERENCES & CREDITS
+─────────────────────────────────────────────────────── -->
+<section class="section-wrapper refs-section-bg" id="references" aria-labelledby="refs-heading">
+  <div class="section-inner">
+
+    <!-- Section Header -->
+    <div class="section-header" data-aos="fade-up">
+      <div class="section-tag">
+        <span data-lucide="book-open" class="w-4 h-4"></span> Documentation
+      </div>
+      <h2 id="refs-heading" class="section-title">References &amp; Credits</h2>
+      <p class="section-subtitle" style="max-width:640px">
+        Full citation of every external library, framework, image, font, API, and tool used in the ConnectHBG project. TSA Webmaster 2025–26 competition entry.
+      </p>
+    </div>
+
+    <!-- ══════════════════════════════════════════════
+         TSA COMPETITION DOCUMENTS
+    ══════════════════════════════════════════════ -->
+    <div class="refs-subsection" data-aos="fade-up">
+      <p class="refs-subsection-label">Competition</p>
+      <h3 class="refs-subsection-heading">TSA Competition Documents</h3>
+      <p style="font-size:14px;color:var(--navy-600);margin:0 0 24px;line-height:1.6">
+        The following documents are required by TSA for the 2025–26 Webmaster event. They are embedded below so judges may review them without leaving the site.
+      </p>
+
+      <!-- Work Log -->
+      <div class="refs-doc-row" data-aos="fade-up">
+        <span data-lucide="file-text" class="refs-doc-icon"></span>
+        <span class="refs-doc-name">Work Log 2025–26</span>
+      </div>
+      <div style="margin-bottom:32px">
+        <iframe
+          src="documents/work-log.pdf"
+          title="Work Log 2025-26 PDF viewer"
+          style="width:100%;height:600px;border:1px solid rgba(0,0,0,0.08);border-radius:12px;overflow:hidden;display:block"
+          aria-label="Work Log 2025-26 embedded PDF">
+          <p style="padding:16px;font-size:14px;color:var(--navy-600)">
+            Your browser does not support embedded PDFs.
+            <a href="documents/work-log.pdf" download style="color:var(--teal);font-weight:600">Download the Work Log here</a>.
+          </p>
+        </iframe>
+      </div>
+
+      <!-- Copyright Checklist -->
+      <div class="refs-doc-row" data-aos="fade-up">
+        <span data-lucide="file-text" class="refs-doc-icon"></span>
+        <span class="refs-doc-name">Student Copyright Checklist 2025–26</span>
+      </div>
+      <div style="margin-bottom:16px">
+        <iframe
+          src="documents/copyright-checklist.pdf"
+          title="Student Copyright Checklist 2025-26 PDF viewer"
+          style="width:100%;height:600px;border:1px solid rgba(0,0,0,0.08);border-radius:12px;overflow:hidden;display:block"
+          aria-label="Student Copyright Checklist 2025-26 embedded PDF">
+          <p style="padding:16px;font-size:14px;color:var(--navy-600)">
+            Your browser does not support embedded PDFs.
+            <a href="documents/copyright-checklist.pdf" download style="color:var(--teal);font-weight:600">Download the Copyright Checklist here</a>.
+          </p>
+        </iframe>
+      </div>
+    </div>
+
+    <!-- ══════════════════════════════════════════════
+         FRAMEWORKS & LIBRARIES
+    ══════════════════════════════════════════════ -->
+    <div class="refs-subsection" data-aos="fade-up">
+      <p class="refs-subsection-label">Open Source</p>
+      <h3 class="refs-subsection-heading">Frameworks &amp; Libraries</h3>
+      <p style="font-size:14px;color:var(--navy-600);margin:0 0 20px;line-height:1.6">
+        Every JavaScript library and CSS framework used in this project. All are open-source and free to use.
+      </p>
+      <ul class="refs-stack-list">
+        <li class="refs-stack-item">
+          <span class="refs-stack-name">Tailwind CSS (CDN)</span>
+          <span class="refs-stack-sep">—</span>
+          <span class="refs-stack-desc">
+            <strong>MIT License</strong> &nbsp;·&nbsp;
+            <a href="https://cdn.tailwindcss.com" target="_blank" rel="noopener noreferrer" style="color:var(--teal)">cdn.tailwindcss.com</a> &nbsp;·&nbsp;
+            Utility-first CSS framework used for responsive layout, spacing, and styling throughout the site.
+          </span>
+        </li>
+        <li class="refs-stack-item">
+          <span class="refs-stack-name">Leaflet 1.9.4</span>
+          <span class="refs-stack-sep">—</span>
+          <span class="refs-stack-desc">
+            <strong>BSD-2-Clause License</strong> &nbsp;·&nbsp;
+            <a href="https://leafletjs.com" target="_blank" rel="noopener noreferrer" style="color:var(--teal)">leafletjs.com</a> &nbsp;·&nbsp;
+            Interactive map rendering for the resource directory map view and resource detail mini-maps.
+          </span>
+        </li>
+        <li class="refs-stack-item">
+          <span class="refs-stack-name">Leaflet MarkerCluster 1.5.3</span>
+          <span class="refs-stack-sep">—</span>
+          <span class="refs-stack-desc">
+            <strong>MIT License</strong> &nbsp;·&nbsp;
+            <a href="https://github.com/Leaflet/Leaflet.markercluster" target="_blank" rel="noopener noreferrer" style="color:var(--teal)">github.com/Leaflet/Leaflet.markercluster</a> &nbsp;·&nbsp;
+            Smart clustering of map markers when zoomed out so overlapping pins group together cleanly.
+          </span>
+        </li>
+        <li class="refs-stack-item">
+          <span class="refs-stack-name">Leaflet Heat 0.2.0</span>
+          <span class="refs-stack-sep">—</span>
+          <span class="refs-stack-desc">
+            <strong>BSD-2-Clause License</strong> &nbsp;·&nbsp;
+            <a href="https://github.com/Leaflet/Leaflet.heat" target="_blank" rel="noopener noreferrer" style="color:var(--teal)">github.com/Leaflet/Leaflet.heat</a> &nbsp;·&nbsp;
+            Density heatmap overlay on the resource map showing where resources are concentrated.
+          </span>
+        </li>
+        <li class="refs-stack-item">
+          <span class="refs-stack-name">Apache ECharts 5</span>
+          <span class="refs-stack-sep">—</span>
+          <span class="refs-stack-desc">
+            <strong>Apache-2.0 License</strong> &nbsp;·&nbsp;
+            <a href="https://echarts.apache.org" target="_blank" rel="noopener noreferrer" style="color:var(--teal)">echarts.apache.org</a> &nbsp;·&nbsp;
+            2D data visualizations including radar chart, sankey flow diagram, and live community metrics dashboard.
+          </span>
+        </li>
+        <li class="refs-stack-item">
+          <span class="refs-stack-name">ECharts-GL 2</span>
+          <span class="refs-stack-sep">—</span>
+          <span class="refs-stack-desc">
+            <strong>BSD-3-Clause License</strong> &nbsp;·&nbsp;
+            <a href="https://github.com/ecomfe/echarts-gl" target="_blank" rel="noopener noreferrer" style="color:var(--teal)">github.com/ecomfe/echarts-gl</a> &nbsp;·&nbsp;
+            WebGL extension for ECharts enabling 3D bar chart rendering in the analytics section.
+          </span>
+        </li>
+        <li class="refs-stack-item">
+          <span class="refs-stack-name">Three.js r128</span>
+          <span class="refs-stack-sep">—</span>
+          <span class="refs-stack-desc">
+            <strong>MIT License</strong> &nbsp;·&nbsp;
+            <a href="https://threejs.org" target="_blank" rel="noopener noreferrer" style="color:var(--teal)">threejs.org</a> &nbsp;·&nbsp;
+            3D rendering engine used for the community orbit visualization and first-person virtual city world explorer.
+          </span>
+        </li>
+        <li class="refs-stack-item">
+          <span class="refs-stack-name">AOS 2.3.1</span>
+          <span class="refs-stack-sep">—</span>
+          <span class="refs-stack-desc">
+            <strong>MIT License</strong> &nbsp;·&nbsp;
+            <a href="https://michalsnik.github.io/aos" target="_blank" rel="noopener noreferrer" style="color:var(--teal)">michalsnik.github.io/aos</a> &nbsp;·&nbsp;
+            Animate On Scroll library that triggers smooth entrance animations as users scroll down the page.
+          </span>
+        </li>
+        <li class="refs-stack-item">
+          <span class="refs-stack-name">Lucide Icons</span>
+          <span class="refs-stack-sep">—</span>
+          <span class="refs-stack-desc">
+            <strong>ISC License</strong> &nbsp;·&nbsp;
+            <a href="https://lucide.dev" target="_blank" rel="noopener noreferrer" style="color:var(--teal)">lucide.dev</a> &nbsp;·&nbsp;
+            Consistent SVG icon library used for all interface icons across the site — navigation, cards, buttons, and more.
+          </span>
+        </li>
+      </ul>
+    </div>
+
+    <!-- ══════════════════════════════════════════════
+         FONTS
+    ══════════════════════════════════════════════ -->
+    <div class="refs-subsection" data-aos="fade-up">
+      <p class="refs-subsection-label">Typography</p>
+      <h3 class="refs-subsection-heading">Fonts</h3>
+      <ul class="refs-stack-list">
+        <li class="refs-stack-item">
+          <span class="refs-stack-name">Inter (weights 300–900)</span>
+          <span class="refs-stack-sep">—</span>
+          <span class="refs-stack-desc">
+            <strong>SIL Open Font License 1.1</strong> &nbsp;·&nbsp;
+            <a href="https://fonts.google.com/specimen/Inter" target="_blank" rel="noopener noreferrer" style="color:var(--teal)">fonts.google.com</a> &nbsp;·&nbsp;
+            Designed by Rasmus Andersson. Primary typeface used for all text — headings, body copy, labels, and UI elements — across the entire site.
+          </span>
+        </li>
+      </ul>
+    </div>
+
+    <!-- ══════════════════════════════════════════════
+         IMAGES
+    ══════════════════════════════════════════════ -->
+    <div class="refs-subsection" data-aos="fade-up">
+      <p class="refs-subsection-label">Photography</p>
+      <h3 class="refs-subsection-heading">Images</h3>
+      <p class="refs-image-note" style="margin-bottom:24px">
+        All photographs used on ConnectHBG are sourced from <strong><a href="https://unsplash.com" target="_blank" rel="noopener noreferrer" style="color:var(--teal)">Unsplash</a></strong> (unsplash.com) and are used under the <strong>Unsplash License</strong>, which permits free use for commercial and non-commercial purposes without attribution required. Attribution is provided here as best practice and for TSA documentation purposes.
+      </p>
+
+      <h4 class="refs-stack-heading">Love Harrisonburg Photo Marquee (index.html)</h4>
+      <ul class="refs-stack-list" style="margin-bottom:32px">
+        <li class="refs-stack-item"><span class="refs-stack-name" style="min-width:80px;font-size:12px;word-break:break-all"><a href="https://images.unsplash.com/photo-1506905925346-21bda4d32df4" target="_blank" rel="noopener noreferrer" style="color:var(--teal)">photo-1506905925346</a></span><span class="refs-stack-sep">—</span><span class="refs-stack-desc">Mountain panorama landscape — community nature banner</span></li>
+        <li class="refs-stack-item"><span class="refs-stack-name" style="min-width:80px;font-size:12px;word-break:break-all"><a href="https://images.unsplash.com/photo-1464822759023-fed622ff2c3b" target="_blank" rel="noopener noreferrer" style="color:var(--teal)">photo-1464822759023</a></span><span class="refs-stack-sep">—</span><span class="refs-stack-desc">Mountain alpine outdoor scene — Shenandoah Valley imagery</span></li>
+        <li class="refs-stack-item"><span class="refs-stack-name" style="min-width:80px;font-size:12px;word-break:break-all"><a href="https://images.unsplash.com/photo-1441974231531-c6227db76b6e" target="_blank" rel="noopener noreferrer" style="color:var(--teal)">photo-1441974231531</a></span><span class="refs-stack-sep">—</span><span class="refs-stack-desc">Forest trail in sunlight — parks and outdoor spaces</span></li>
+        <li class="refs-stack-item"><span class="refs-stack-name" style="min-width:80px;font-size:12px;word-break:break-all"><a href="https://images.unsplash.com/photo-1501854140801-50d01698950b" target="_blank" rel="noopener noreferrer" style="color:var(--teal)">photo-1501854140801</a></span><span class="refs-stack-sep">—</span><span class="refs-stack-desc">Aerial mountain and valley view — Harrisonburg region</span></li>
+        <li class="refs-stack-item"><span class="refs-stack-name" style="min-width:80px;font-size:12px;word-break:break-all"><a href="https://images.unsplash.com/photo-1475924156734-496f6cac6ec1" target="_blank" rel="noopener noreferrer" style="color:var(--teal)">photo-1475924156734</a></span><span class="refs-stack-sep">—</span><span class="refs-stack-desc">Mountain valley with wildflowers — Shenandoah scenery</span></li>
+        <li class="refs-stack-item"><span class="refs-stack-name" style="min-width:80px;font-size:12px;word-break:break-all"><a href="https://images.unsplash.com/photo-1540979388789-6cee28a1cdc9" target="_blank" rel="noopener noreferrer" style="color:var(--teal)">photo-1540979388789</a></span><span class="refs-stack-sep">—</span><span class="refs-stack-desc">Autumn outdoor community gathering scene</span></li>
+        <li class="refs-stack-item"><span class="refs-stack-name" style="min-width:80px;font-size:12px;word-break:break-all"><a href="https://images.unsplash.com/photo-1510797215324-95aa89f43c33" target="_blank" rel="noopener noreferrer" style="color:var(--teal)">photo-1510797215324</a></span><span class="refs-stack-sep">—</span><span class="refs-stack-desc">Serene nature and lake scene — Virginia outdoors</span></li>
+        <li class="refs-stack-item"><span class="refs-stack-name" style="min-width:80px;font-size:12px;word-break:break-all"><a href="https://images.unsplash.com/photo-1470770841072-f978cf4d019e" target="_blank" rel="noopener noreferrer" style="color:var(--teal)">photo-1470770841072</a></span><span class="refs-stack-sep">—</span><span class="refs-stack-desc">Peaceful mountain lake reflection — Harrisonburg area</span></li>
+      </ul>
+
+      <h4 class="refs-stack-heading">City Council Member Photos (government.html)</h4>
+      <ul class="refs-stack-list" style="margin-bottom:32px">
+        <li class="refs-stack-item"><span class="refs-stack-name" style="min-width:80px;font-size:12px;word-break:break-all"><a href="https://images.unsplash.com/photo-1560250097-0b93528c311a" target="_blank" rel="noopener noreferrer" style="color:var(--teal)">photo-1560250097</a></span><span class="refs-stack-sep">—</span><span class="refs-stack-desc">Professional man in suit — Mayor Sal Romero portrait</span></li>
+        <li class="refs-stack-item"><span class="refs-stack-name" style="min-width:80px;font-size:12px;word-break:break-all"><a href="https://images.unsplash.com/photo-1573496359142-b8d87734a5a2" target="_blank" rel="noopener noreferrer" style="color:var(--teal)">photo-1573496359142</a></span><span class="refs-stack-sep">—</span><span class="refs-stack-desc">Professional woman — Vice Mayor Laura Gonzalez portrait</span></li>
+        <li class="refs-stack-item"><span class="refs-stack-name" style="min-width:80px;font-size:12px;word-break:break-all"><a href="https://images.unsplash.com/photo-1472099645785-5658abf4ff4e" target="_blank" rel="noopener noreferrer" style="color:var(--teal)">photo-1472099645785</a></span><span class="refs-stack-sep">—</span><span class="refs-stack-desc">Professional man smiling — Council Member Chris Jones portrait</span></li>
+        <li class="refs-stack-item"><span class="refs-stack-name" style="min-width:80px;font-size:12px;word-break:break-all"><a href="https://images.unsplash.com/photo-1580489944761-15a19d654956" target="_blank" rel="noopener noreferrer" style="color:var(--teal)">photo-1580489944761</a></span><span class="refs-stack-sep">—</span><span class="refs-stack-desc">Professional woman smiling — Council Member Monica Patel portrait</span></li>
+        <li class="refs-stack-item"><span class="refs-stack-name" style="min-width:80px;font-size:12px;word-break:break-all"><a href="https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d" target="_blank" rel="noopener noreferrer" style="color:var(--teal)">photo-1507003211169</a></span><span class="refs-stack-sep">—</span><span class="refs-stack-desc">Professional man — Council Member George Whitmore portrait</span></li>
+        <li class="refs-stack-item"><span class="refs-stack-name" style="min-width:80px;font-size:12px;word-break:break-all"><a href="https://images.unsplash.com/photo-1594744803329-e58b31de8bf5" target="_blank" rel="noopener noreferrer" style="color:var(--teal)">photo-1594744803329</a></span><span class="refs-stack-sep">—</span><span class="refs-stack-desc">Professional woman in office — Council Member Dina Abramson portrait</span></li>
+      </ul>
+
+      <h4 class="refs-stack-heading">Resource Directory Cards (index.html / data/resources.js)</h4>
+      <ul class="refs-stack-list" style="margin-bottom:32px">
+        <li class="refs-stack-item"><span class="refs-stack-name" style="min-width:80px;font-size:12px"><a href="https://images.unsplash.com/photo-1593113598332-cd288d649433" target="_blank" rel="noopener noreferrer" style="color:var(--teal)">photo-1593113598332</a></span><span class="refs-stack-sep">—</span><span class="refs-stack-desc">Community meal service / food pantry — Friendly City Food Coalition</span></li>
+        <li class="refs-stack-item"><span class="refs-stack-name" style="min-width:80px;font-size:12px"><a href="https://images.unsplash.com/photo-1560518883-ce09059eeffa" target="_blank" rel="noopener noreferrer" style="color:var(--teal)">photo-1560518883</a></span><span class="refs-stack-sep">—</span><span class="refs-stack-desc">Residential housing / real estate — housing assistance programs</span></li>
+        <li class="refs-stack-item"><span class="refs-stack-name" style="min-width:80px;font-size:12px"><a href="https://images.unsplash.com/photo-1517694712202-14dd9538aa97" target="_blank" rel="noopener noreferrer" style="color:var(--teal)">photo-1517694712202</a></span><span class="refs-stack-sep">—</span><span class="refs-stack-desc">Person on laptop — education / digital literacy programs</span></li>
+        <li class="refs-stack-item"><span class="refs-stack-name" style="min-width:80px;font-size:12px"><a href="https://images.unsplash.com/photo-1581092918056-0c4c3acd3789" target="_blank" rel="noopener noreferrer" style="color:var(--teal)">photo-1581092918056</a></span><span class="refs-stack-sep">—</span><span class="refs-stack-desc">Healthcare professional — Sentara RMH Community Health</span></li>
+        <li class="refs-stack-item"><span class="refs-stack-name" style="min-width:80px;font-size:12px"><a href="https://images.unsplash.com/photo-1573497620053-ea5300f94f21" target="_blank" rel="noopener noreferrer" style="color:var(--teal)">photo-1573497620053</a></span><span class="refs-stack-sep">—</span><span class="refs-stack-desc">Professional counseling / mental health session</span></li>
+        <li class="refs-stack-item"><span class="refs-stack-name" style="min-width:80px;font-size:12px"><a href="https://images.unsplash.com/photo-1416879595882-3373a0480b5b" target="_blank" rel="noopener noreferrer" style="color:var(--teal)">photo-1416879595882</a></span><span class="refs-stack-sep">—</span><span class="refs-stack-desc">Community garden — urban farming and food programs</span></li>
+        <li class="refs-stack-item"><span class="refs-stack-name" style="min-width:80px;font-size:12px"><a href="https://images.unsplash.com/photo-1571019613454-1cb2f99b2d8b" target="_blank" rel="noopener noreferrer" style="color:var(--teal)">photo-1571019613454</a></span><span class="refs-stack-sep">—</span><span class="refs-stack-desc">Fitness and exercise — recreation center programs</span></li>
+        <li class="refs-stack-item"><span class="refs-stack-name" style="min-width:80px;font-size:12px"><a href="https://images.unsplash.com/photo-1558618666-fcd25c85cd64" target="_blank" rel="noopener noreferrer" style="color:var(--teal)">photo-1558618666</a></span><span class="refs-stack-sep">—</span><span class="refs-stack-desc">Suburban housing and neighborhood — housing assistance</span></li>
+        <li class="refs-stack-item"><span class="refs-stack-name" style="min-width:80px;font-size:12px"><a href="https://images.unsplash.com/photo-1427504494785-3a9ca7044f45" target="_blank" rel="noopener noreferrer" style="color:var(--teal)">photo-1427504494785</a></span><span class="refs-stack-sep">—</span><span class="refs-stack-desc">School building — education and tutoring programs</span></li>
+        <li class="refs-stack-item"><span class="refs-stack-name" style="min-width:80px;font-size:12px"><a href="https://images.unsplash.com/photo-1488521787991-ed7bbaae773c" target="_blank" rel="noopener noreferrer" style="color:var(--teal)">photo-1488521787991</a></span><span class="refs-stack-sep">—</span><span class="refs-stack-desc">Family counseling and social services</span></li>
+        <li class="refs-stack-item"><span class="refs-stack-name" style="min-width:80px;font-size:12px"><a href="https://images.unsplash.com/photo-1571019614242-c5c5dee9f50b" target="_blank" rel="noopener noreferrer" style="color:var(--teal)">photo-1571019614242</a></span><span class="refs-stack-sep">—</span><span class="refs-stack-desc">Youth sports and recreation — community programs</span></li>
+        <li class="refs-stack-item"><span class="refs-stack-name" style="min-width:80px;font-size:12px"><a href="https://images.unsplash.com/photo-1481627834876-b7833e8f5570" target="_blank" rel="noopener noreferrer" style="color:var(--teal)">photo-1481627834876</a></span><span class="refs-stack-sep">—</span><span class="refs-stack-desc">Library books and reading — Harrisonburg Public Library</span></li>
+        <li class="refs-stack-item"><span class="refs-stack-name" style="min-width:80px;font-size:12px"><a href="https://images.unsplash.com/photo-1529390079861-591de354faf5" target="_blank" rel="noopener noreferrer" style="color:var(--teal)">photo-1529390079861</a></span><span class="refs-stack-sep">—</span><span class="refs-stack-desc">Teens and youth — after-school programs</span></li>
+        <li class="refs-stack-item"><span class="refs-stack-name" style="min-width:80px;font-size:12px"><a href="https://images.unsplash.com/photo-1513364776144-60967b0f800f" target="_blank" rel="noopener noreferrer" style="color:var(--teal)">photo-1513364776144</a></span><span class="refs-stack-sep">—</span><span class="refs-stack-desc">Arts and community programs — creative workshops</span></li>
+        <li class="refs-stack-item"><span class="refs-stack-name" style="min-width:80px;font-size:12px"><a href="https://images.unsplash.com/photo-1529156069898-49953e39b3ac" target="_blank" rel="noopener noreferrer" style="color:var(--teal)">photo-1529156069898</a></span><span class="refs-stack-sep">—</span><span class="refs-stack-desc">Community gathering and meeting — civic engagement</span></li>
+        <li class="refs-stack-item"><span class="refs-stack-name" style="min-width:80px;font-size:12px"><a href="https://images.unsplash.com/photo-1588072432836-e10032774350" target="_blank" rel="noopener noreferrer" style="color:var(--teal)">photo-1588072432836</a></span><span class="refs-stack-sep">—</span><span class="refs-stack-desc">Community support and social services outreach</span></li>
+        <li class="refs-stack-item"><span class="refs-stack-name" style="min-width:80px;font-size:12px"><a href="https://images.unsplash.com/photo-1576091160550-2173dba999ef" target="_blank" rel="noopener noreferrer" style="color:var(--teal)">photo-1576091160550</a></span><span class="refs-stack-sep">—</span><span class="refs-stack-desc">Professional meeting — workforce development</span></li>
+        <li class="refs-stack-item"><span class="refs-stack-name" style="min-width:80px;font-size:12px"><a href="https://images.unsplash.com/photo-1504384308090-c894fdcc538d" target="_blank" rel="noopener noreferrer" style="color:var(--teal)">photo-1504384308090</a></span><span class="refs-stack-sep">—</span><span class="refs-stack-desc">Computer lab / technology programs</span></li>
+        <li class="refs-stack-item"><span class="refs-stack-name" style="min-width:80px;font-size:12px"><a href="https://images.unsplash.com/photo-1414235077428-338989a2e8c0" target="_blank" rel="noopener noreferrer" style="color:var(--teal)">photo-1414235077428</a></span><span class="refs-stack-sep">—</span><span class="refs-stack-desc">Restaurant and food — food bank and meal programs</span></li>
+        <li class="refs-stack-item"><span class="refs-stack-name" style="min-width:80px;font-size:12px"><a href="https://images.unsplash.com/photo-1507842217343-583bb7270b66" target="_blank" rel="noopener noreferrer" style="color:var(--teal)">photo-1507842217343</a></span><span class="refs-stack-sep">—</span><span class="refs-stack-desc">Library books — literacy and learning resources</span></li>
+      </ul>
+
+      <h4 class="refs-stack-heading">Extra Resources &amp; Events (data/extra-content.js)</h4>
+      <ul class="refs-stack-list" style="margin-bottom:32px">
+        <li class="refs-stack-item"><span class="refs-stack-name" style="min-width:80px;font-size:12px"><a href="https://images.unsplash.com/photo-1528819622765-d6bcf132f793" target="_blank" rel="noopener noreferrer" style="color:var(--teal)">photo-1528819622765</a></span><span class="refs-stack-sep">—</span><span class="refs-stack-desc">Chess board / board games — Community Chess &amp; Games Club</span></li>
+        <li class="refs-stack-item"><span class="refs-stack-name" style="min-width:80px;font-size:12px"><a href="https://images.unsplash.com/photo-1575361204480-aadea25e6e68" target="_blank" rel="noopener noreferrer" style="color:var(--teal)">photo-1575361204480</a></span><span class="refs-stack-sep">—</span><span class="refs-stack-desc">Volunteer activity — community service event</span></li>
+        <li class="refs-stack-item"><span class="refs-stack-name" style="min-width:80px;font-size:12px"><a href="https://images.unsplash.com/photo-1606092195730-5d7b9af1efc5" target="_blank" rel="noopener noreferrer" style="color:var(--teal)">photo-1606092195730</a></span><span class="refs-stack-sep">—</span><span class="refs-stack-desc">Community event / neighborhood gathering</span></li>
+        <li class="refs-stack-item"><span class="refs-stack-name" style="min-width:80px;font-size:12px"><a href="https://images.unsplash.com/photo-1589829545856-d10d557cf95f" target="_blank" rel="noopener noreferrer" style="color:var(--teal)">photo-1589829545856</a></span><span class="refs-stack-sep">—</span><span class="refs-stack-desc">Legal / advocacy services program</span></li>
+        <li class="refs-stack-item"><span class="refs-stack-name" style="min-width:80px;font-size:12px"><a href="https://images.unsplash.com/photo-1521791136064-7986c2920216" target="_blank" rel="noopener noreferrer" style="color:var(--teal)">photo-1521791136064</a></span><span class="refs-stack-sep">—</span><span class="refs-stack-desc">Professionals / business meeting — workforce programs</span></li>
+        <li class="refs-stack-item"><span class="refs-stack-name" style="min-width:80px;font-size:12px"><a href="https://images.unsplash.com/photo-1544620347-c4fd4a3d5957" target="_blank" rel="noopener noreferrer" style="color:var(--teal)">photo-1544620347</a></span><span class="refs-stack-sep">—</span><span class="refs-stack-desc">Transit / bus — public transportation program</span></li>
+        <li class="refs-stack-item"><span class="refs-stack-name" style="min-width:80px;font-size:12px"><a href="https://images.unsplash.com/photo-1503454537195-1dcabb73ffb9" target="_blank" rel="noopener noreferrer" style="color:var(--teal)">photo-1503454537195</a></span><span class="refs-stack-sep">—</span><span class="refs-stack-desc">Child care and family services program</span></li>
+        <li class="refs-stack-item"><span class="refs-stack-name" style="min-width:80px;font-size:12px"><a href="https://images.unsplash.com/photo-1609220136736-443140cffec6" target="_blank" rel="noopener noreferrer" style="color:var(--teal)">photo-1609220136736</a></span><span class="refs-stack-sep">—</span><span class="refs-stack-desc">Senior care and elder services program</span></li>
+        <li class="refs-stack-item"><span class="refs-stack-name" style="min-width:80px;font-size:12px"><a href="https://images.unsplash.com/photo-1555664424-778a1e5e1b48" target="_blank" rel="noopener noreferrer" style="color:var(--teal)">photo-1555664424</a></span><span class="refs-stack-sep">—</span><span class="refs-stack-desc">Community celebration and event gathering</span></li>
+        <li class="refs-stack-item"><span class="refs-stack-name" style="min-width:80px;font-size:12px"><a href="https://images.unsplash.com/photo-1533174072545-7a4b6ad7a6c3" target="_blank" rel="noopener noreferrer" style="color:var(--teal)">photo-1533174072545</a></span><span class="refs-stack-sep">—</span><span class="refs-stack-desc">Music and arts performance — community arts program</span></li>
+        <li class="refs-stack-item"><span class="refs-stack-name" style="min-width:80px;font-size:12px"><a href="https://images.unsplash.com/photo-1488459716781-31db52582fe9" target="_blank" rel="noopener noreferrer" style="color:var(--teal)">photo-1488459716781</a></span><span class="refs-stack-sep">—</span><span class="refs-stack-desc">Farmers market / produce — food access program</span></li>
+        <li class="refs-stack-item"><span class="refs-stack-name" style="min-width:80px;font-size:12px"><a href="https://images.unsplash.com/photo-1509062522246-3755977927d7" target="_blank" rel="noopener noreferrer" style="color:var(--teal)">photo-1509062522246</a></span><span class="refs-stack-sep">—</span><span class="refs-stack-desc">Tutoring / study session — education support</span></li>
+        <li class="refs-stack-item"><span class="refs-stack-name" style="min-width:80px;font-size:12px"><a href="https://images.unsplash.com/photo-1516627145497-ae6968895b74" target="_blank" rel="noopener noreferrer" style="color:var(--teal)">photo-1516627145497</a></span><span class="refs-stack-sep">—</span><span class="refs-stack-desc">Sports and athletics — youth recreation program</span></li>
+        <li class="refs-stack-item"><span class="refs-stack-name" style="min-width:80px;font-size:12px"><a href="https://images.unsplash.com/photo-1582213782179-e0d53f98f2ca" target="_blank" rel="noopener noreferrer" style="color:var(--teal)">photo-1582213782179</a></span><span class="refs-stack-sep">—</span><span class="refs-stack-desc">Community group gathering — civic event</span></li>
+        <li class="refs-stack-item"><span class="refs-stack-name" style="min-width:80px;font-size:12px"><a href="https://images.unsplash.com/photo-1546519638-68e109498ffc" target="_blank" rel="noopener noreferrer" style="color:var(--teal)">photo-1546519638</a></span><span class="refs-stack-sep">—</span><span class="refs-stack-desc">Basketball / youth sports program</span></li>
+        <li class="refs-stack-item"><span class="refs-stack-name" style="min-width:80px;font-size:12px"><a href="https://images.unsplash.com/photo-1456513080510-7bf3a84b82f8" target="_blank" rel="noopener noreferrer" style="color:var(--teal)">photo-1456513080510</a></span><span class="refs-stack-sep">—</span><span class="refs-stack-desc">Reading and library resources — literacy program</span></li>
+        <li class="refs-stack-item"><span class="refs-stack-name" style="min-width:80px;font-size:12px"><a href="https://images.unsplash.com/photo-1587300003388-59208cc962cb" target="_blank" rel="noopener noreferrer" style="color:var(--teal)">photo-1587300003388</a></span><span class="refs-stack-sep">—</span><span class="refs-stack-desc">Pet / dog — community animal program</span></li>
+        <li class="refs-stack-item"><span class="refs-stack-name" style="min-width:80px;font-size:12px"><a href="https://images.unsplash.com/photo-1459865264687-595d652de67e" target="_blank" rel="noopener noreferrer" style="color:var(--teal)">photo-1459865264687</a></span><span class="refs-stack-sep">—</span><span class="refs-stack-desc">Festival / outdoor event — community celebration</span></li>
+        <li class="refs-stack-item"><span class="refs-stack-name" style="min-width:80px;font-size:12px"><a href="https://images.unsplash.com/photo-1536440136628-849c177e76a1" target="_blank" rel="noopener noreferrer" style="color:var(--teal)">photo-1536440136628</a></span><span class="refs-stack-sep">—</span><span class="refs-stack-desc">Movie screening event — community entertainment</span></li>
+        <li class="refs-stack-item"><span class="refs-stack-name" style="min-width:80px;font-size:12px"><a href="https://images.unsplash.com/photo-1516450360452-9312f5e86fc7" target="_blank" rel="noopener noreferrer" style="color:var(--teal)">photo-1516450360452</a></span><span class="refs-stack-sep">—</span><span class="refs-stack-desc">Music concert and performance — arts community event</span></li>
+        <li class="refs-stack-item"><span class="refs-stack-name" style="min-width:80px;font-size:12px"><a href="https://images.unsplash.com/photo-1612369560806-a6de0b2e8e5c" target="_blank" rel="noopener noreferrer" style="color:var(--teal)">photo-1612369560806</a></span><span class="refs-stack-sep">—</span><span class="refs-stack-desc">Community connection — neighborhood outreach program</span></li>
+        <li class="refs-stack-item"><span class="refs-stack-name" style="min-width:80px;font-size:12px"><a href="https://images.unsplash.com/photo-1581726707445-75cbe4efc586" target="_blank" rel="noopener noreferrer" style="color:var(--teal)">photo-1581726707445</a></span><span class="refs-stack-sep">—</span><span class="refs-stack-desc">Outdoor recreation / activity — parks program</span></li>
+      </ul>
+
+      <h4 class="refs-stack-heading">News Articles &amp; Fundraiser Images (data/extra-content.js)</h4>
+      <ul class="refs-stack-list" style="margin-bottom:16px">
+        <li class="refs-stack-item"><span class="refs-stack-name" style="min-width:80px;font-size:12px"><a href="https://images.unsplash.com/photo-1477959858617-67f85cf4f1df" target="_blank" rel="noopener noreferrer" style="color:var(--teal)">photo-1477959858617</a></span><span class="refs-stack-sep">—</span><span class="refs-stack-desc">City aerial / urban skyline — news feature image</span></li>
+        <li class="refs-stack-item"><span class="refs-stack-name" style="min-width:80px;font-size:12px"><a href="https://images.unsplash.com/photo-1547592166-23ac45744acd" target="_blank" rel="noopener noreferrer" style="color:var(--teal)">photo-1547592166</a></span><span class="refs-stack-sep">—</span><span class="refs-stack-desc">Cooking / food preparation — food news story</span></li>
+        <li class="refs-stack-item"><span class="refs-stack-name" style="min-width:80px;font-size:12px"><a href="https://images.unsplash.com/photo-1570129477492-45c003edd2be" target="_blank" rel="noopener noreferrer" style="color:var(--teal)">photo-1570129477492</a></span><span class="refs-stack-sep">—</span><span class="refs-stack-desc">Residential housing — housing news story</span></li>
+        <li class="refs-stack-item"><span class="refs-stack-name" style="min-width:80px;font-size:12px"><a href="https://images.unsplash.com/photo-1532996122724-e3c354a0b15b" target="_blank" rel="noopener noreferrer" style="color:var(--teal)">photo-1532996122724</a></span><span class="refs-stack-sep">—</span><span class="refs-stack-desc">Recycling / environmental — sustainability news story</span></li>
+        <li class="refs-stack-item"><span class="refs-stack-name" style="min-width:80px;font-size:12px"><a href="https://images.unsplash.com/photo-1542838132-92c53300491e" target="_blank" rel="noopener noreferrer" style="color:var(--teal)">photo-1542838132</a></span><span class="refs-stack-sep">—</span><span class="refs-stack-desc">Farmers market / produce — local economy news story</span></li>
+        <li class="refs-stack-item"><span class="refs-stack-name" style="min-width:80px;font-size:12px"><a href="https://images.unsplash.com/photo-1589994965851-a8f479c573a9" target="_blank" rel="noopener noreferrer" style="color:var(--teal)">photo-1589994965851</a></span><span class="refs-stack-sep">—</span><span class="refs-stack-desc">Youth sports / kids playing — youth programs news story</span></li>
+        <li class="refs-stack-item"><span class="refs-stack-name" style="min-width:80px;font-size:12px"><a href="https://images.unsplash.com/photo-1570125909232-eb263c188f7e" target="_blank" rel="noopener noreferrer" style="color:var(--teal)">photo-1570125909232</a></span><span class="refs-stack-sep">—</span><span class="refs-stack-desc">Housing exterior — affordable housing news story</span></li>
+        <li class="refs-stack-item"><span class="refs-stack-name" style="min-width:80px;font-size:12px"><a href="https://images.unsplash.com/photo-1438761681033-6461ffad8d80" target="_blank" rel="noopener noreferrer" style="color:var(--teal)">photo-1438761681033</a></span><span class="refs-stack-sep">—</span><span class="refs-stack-desc">Woman professional — fundraiser organizer avatar</span></li>
+        <li class="refs-stack-item"><span class="refs-stack-name" style="min-width:80px;font-size:12px"><a href="https://images.unsplash.com/photo-1503676260728-1c00da094a0b" target="_blank" rel="noopener noreferrer" style="color:var(--teal)">photo-1503676260728</a></span><span class="refs-stack-sep">—</span><span class="refs-stack-desc">Teacher and students — education fundraiser image</span></li>
+        <li class="refs-stack-item"><span class="refs-stack-name" style="min-width:80px;font-size:12px"><a href="https://images.unsplash.com/photo-1556742049-0cfed4f6a45d" target="_blank" rel="noopener noreferrer" style="color:var(--teal)">photo-1556742049</a></span><span class="refs-stack-sep">—</span><span class="refs-stack-desc">Volunteer at work — community service fundraiser</span></li>
+        <li class="refs-stack-item"><span class="refs-stack-name" style="min-width:80px;font-size:12px"><a href="https://images.unsplash.com/photo-1544005313-94ddf0286df2" target="_blank" rel="noopener noreferrer" style="color:var(--teal)">photo-1544005313</a></span><span class="refs-stack-sep">—</span><span class="refs-stack-desc">Woman professional — fundraiser organizer avatar</span></li>
+        <li class="refs-stack-item"><span class="refs-stack-name" style="min-width:80px;font-size:12px"><a href="https://images.unsplash.com/photo-1531746020798-e6953c6e8e04" target="_blank" rel="noopener noreferrer" style="color:var(--teal)">photo-1531746020798</a></span><span class="refs-stack-sep">—</span><span class="refs-stack-desc">Woman professional — fundraiser organizer avatar</span></li>
+        <li class="refs-stack-item"><span class="refs-stack-name" style="min-width:80px;font-size:12px"><a href="https://images.unsplash.com/photo-1576267423048-15c0040fec78" target="_blank" rel="noopener noreferrer" style="color:var(--teal)">photo-1576267423048</a></span><span class="refs-stack-sep">—</span><span class="refs-stack-desc">Sports and recreation — athletic fundraiser campaign image</span></li>
+        <li class="refs-stack-item"><span class="refs-stack-name" style="min-width:80px;font-size:12px"><a href="https://images.unsplash.com/photo-1559757175-0eb30cd8c063" target="_blank" rel="noopener noreferrer" style="color:var(--teal)">photo-1559757175</a></span><span class="refs-stack-sep">—</span><span class="refs-stack-desc">Medical / healthcare setting — health fundraiser image</span></li>
+      </ul>
+    </div>
+
+    <!-- ══════════════════════════════════════════════
+         MAP DATA
+    ══════════════════════════════════════════════ -->
+    <div class="refs-subsection" data-aos="fade-up">
+      <p class="refs-subsection-label">Geospatial</p>
+      <h3 class="refs-subsection-heading">Map Data</h3>
+      <ul class="refs-stack-list">
+        <li class="refs-stack-item">
+          <span class="refs-stack-name">OpenStreetMap</span>
+          <span class="refs-stack-sep">—</span>
+          <span class="refs-stack-desc">
+            <strong>Open Data Commons Open Database License (ODbL)</strong> &nbsp;·&nbsp;
+            <a href="https://www.openstreetmap.org" target="_blank" rel="noopener noreferrer" style="color:var(--teal)">openstreetmap.org</a> &nbsp;·&nbsp;
+            Map tiles and geospatial data used in all Leaflet map views throughout the site. Attribution: "© OpenStreetMap contributors."
+          </span>
+        </li>
+      </ul>
+    </div>
+
+    <!-- ══════════════════════════════════════════════
+         AUDIO
+    ══════════════════════════════════════════════ -->
+    <div class="refs-subsection" data-aos="fade-up">
+      <p class="refs-subsection-label">Original Content</p>
+      <h3 class="refs-subsection-heading">Audio &amp; Sound Effects</h3>
+      <p class="refs-image-note" style="margin-bottom:24px">
+        All sound effects and audio clips used throughout ConnectHBG were <strong>created entirely by the project team members</strong> (KA &amp; YV). No third-party audio libraries, stock sound sites, or copyrighted recordings were used. All audio is original work and is not subject to any external license.
+      </p>
+      <ul class="refs-stack-list">
+        <li class="refs-stack-item">
+          <span class="refs-stack-name">UI Sound Effects</span>
+          <span class="refs-stack-sep">—</span>
+          <span class="refs-stack-desc"><strong>Original — created by KA &amp; YV</strong> &nbsp;·&nbsp; All click, notification, confirmation, and interaction sounds used in the site interface were produced by the project team. No external audio sources were used.</span>
+        </li>
+        <li class="refs-stack-item">
+          <span class="refs-stack-name">Text-to-Speech Audio</span>
+          <span class="refs-stack-sep">—</span>
+          <span class="refs-stack-desc"><strong>Device built-in feature</strong> &nbsp;·&nbsp; The text-to-speech voice heard when using the accessibility toolbar is generated entirely by the operating system's built-in speech engine (present on all Windows, macOS, iOS, and Android devices). No audio files were recorded or imported for this feature.</span>
+        </li>
+      </ul>
+    </div>
+
+    <!-- ══════════════════════════════════════════════
+         APIS & BROWSER FEATURES
+    ══════════════════════════════════════════════ -->
+    <div class="refs-subsection" data-aos="fade-up">
+      <p class="refs-subsection-label">Web Standards</p>
+      <h3 class="refs-subsection-heading">APIs &amp; Browser Features</h3>
+      <ul class="refs-stack-list">
+        <li class="refs-stack-item">
+          <span class="refs-stack-name">Web Speech API</span>
+          <span class="refs-stack-sep">—</span>
+          <span class="refs-stack-desc">
+            <strong>W3C Specification</strong> &nbsp;·&nbsp; Built into modern browsers &nbsp;·&nbsp;
+            Used to power the voice search feature in the navigation bar. Converts spoken words into text search queries without any third-party service.
+          </span>
+        </li>
+        <li class="refs-stack-item">
+          <span class="refs-stack-name">SpeechSynthesis API</span>
+          <span class="refs-stack-sep">—</span>
+          <span class="refs-stack-desc">
+            <strong>W3C Specification</strong> &nbsp;·&nbsp; Built into all modern devices and operating systems (Windows, macOS, iOS, Android) &nbsp;·&nbsp;
+            Powers the text-to-speech accessibility feature in the toolbar. Uses the device's own built-in speech engine — no external audio files or third-party services involved.
+          </span>
+        </li>
+        <li class="refs-stack-item">
+          <span class="refs-stack-name">localStorage / sessionStorage</span>
+          <span class="refs-stack-sep">—</span>
+          <span class="refs-stack-desc">
+            <strong>W3C Web Storage Specification</strong> &nbsp;·&nbsp; Built into all modern browsers &nbsp;·&nbsp;
+            Used to persist user preferences (dark mode, font size, favorites, login session) across page loads and sessions without a backend server.
+          </span>
+        </li>
+        <li class="refs-stack-item">
+          <span class="refs-stack-name">Pointer Lock API</span>
+          <span class="refs-stack-sep">—</span>
+          <span class="refs-stack-desc">
+            <strong>W3C Specification</strong> &nbsp;·&nbsp; Built into modern browsers &nbsp;·&nbsp;
+            Used by the Three.js PointerLockControls to capture mouse input for first-person camera movement in the 3D Community City explorer.
+          </span>
+        </li>
+      </ul>
+    </div>
+
+    <!-- ══════════════════════════════════════════════
+         TECHNICAL ARCHITECTURE
+    ══════════════════════════════════════════════ -->
+    <div class="refs-subsection" data-aos="fade-up">
+      <p class="refs-subsection-label">Architecture</p>
+      <h3 class="refs-subsection-heading">Technical Architecture</h3>
+
+      <!-- Pipeline Flow Diagram -->
+      <div class="refs-pipeline" aria-label="Technical architecture pipeline" role="img">
+        <div class="refs-pipeline-box">Browser</div>
+        <span class="refs-pipeline-arrow" aria-hidden="true">→</span>
+        <div class="refs-pipeline-box">HTML / CSS / JS</div>
+        <span class="refs-pipeline-arrow" aria-hidden="true">→</span>
+        <div class="refs-pipeline-box">Leaflet · ECharts · Three.js</div>
+        <span class="refs-pipeline-arrow" aria-hidden="true">→</span>
+        <div class="refs-pipeline-box">LocalStorage</div>
+      </div>
+
+      <!-- Project Stack List -->
+      <h4 class="refs-stack-heading">Project Stack</h4>
+      <ul class="refs-stack-list">
+        <li class="refs-stack-item">
+          <span class="refs-stack-name">HTML5 / CSS3</span>
+          <span class="refs-stack-sep">—</span>
+          <span class="refs-stack-desc">Semantic page structure, accessibility roles (ARIA), responsive layout, custom properties (CSS variables), and animation.</span>
+        </li>
+        <li class="refs-stack-item">
+          <span class="refs-stack-name">JavaScript (ES6+)</span>
+          <span class="refs-stack-sep">—</span>
+          <span class="refs-stack-desc">All site logic — filtering, searching, rendering, dark mode, modal management, user accounts, and more. No build step or bundler required.</span>
+        </li>
+        <li class="refs-stack-item">
+          <span class="refs-stack-name">Tailwind CSS</span>
+          <span class="refs-stack-sep">—</span>
+          <span class="refs-stack-desc">Utility-first CSS framework loaded via CDN for rapid responsive styling without writing custom CSS for every component.</span>
+        </li>
+        <li class="refs-stack-item">
+          <span class="refs-stack-name">Leaflet.js</span>
+          <span class="refs-stack-sep">—</span>
+          <span class="refs-stack-desc">Interactive map layer with MarkerCluster for grouped pins and Leaflet Heat for density heatmap visualization of resource locations.</span>
+        </li>
+        <li class="refs-stack-item">
+          <span class="refs-stack-name">Apache ECharts</span>
+          <span class="refs-stack-sep">—</span>
+          <span class="refs-stack-desc">2D data visualization library powering the community analytics section — radar chart, sankey diagram, and live metric charts.</span>
+        </li>
+        <li class="refs-stack-item">
+          <span class="refs-stack-name">ECharts-GL</span>
+          <span class="refs-stack-sep">—</span>
+          <span class="refs-stack-desc">WebGL extension for ECharts enabling GPU-accelerated 3D bar charts in the community analytics dashboard.</span>
+        </li>
+        <li class="refs-stack-item">
+          <span class="refs-stack-name">Three.js</span>
+          <span class="refs-stack-sep">—</span>
+          <span class="refs-stack-desc">3D graphics library rendering the community orbit globe visualization and the first-person 3D Community City explorer with WASD movement and pointer lock.</span>
+        </li>
+        <li class="refs-stack-item">
+          <span class="refs-stack-name">AOS (Animate On Scroll)</span>
+          <span class="refs-stack-sep">—</span>
+          <span class="refs-stack-desc">Scroll-triggered animation library that fades and slides content into view as users scroll, providing a dynamic and polished feel.</span>
+        </li>
+        <li class="refs-stack-item">
+          <span class="refs-stack-name">Lucide Icons</span>
+          <span class="refs-stack-sep">—</span>
+          <span class="refs-stack-desc">Consistent, accessible SVG icon set providing over 1,000 pixel-perfect icons used throughout navigation, cards, buttons, and all UI elements.</span>
+        </li>
+        <li class="refs-stack-item">
+          <span class="refs-stack-name">Inter Typeface</span>
+          <span class="refs-stack-sep">—</span>
+          <span class="refs-stack-desc">Google Fonts-hosted variable font designed for screen legibility. Used at weights 300–900 across all text on the site.</span>
+        </li>
+        <li class="refs-stack-item">
+          <span class="refs-stack-name">LocalStorage / SessionStorage</span>
+          <span class="refs-stack-sep">—</span>
+          <span class="refs-stack-desc">Browser-native key-value storage used to persist dark mode, font size, favorites, and user account session without any backend or server.</span>
+        </li>
+        <li class="refs-stack-item">
+          <span class="refs-stack-name">Web Speech &amp; SpeechSynthesis APIs</span>
+          <span class="refs-stack-sep">—</span>
+          <span class="refs-stack-desc">Native browser APIs enabling voice search input and text-to-speech accessibility output, making the site more inclusive for all users.</span>
+        </li>
+      </ul>
+    </div>
+
+    <!-- ══════════════════════════════════════════════
+         DISCLAIMER
+    ══════════════════════════════════════════════ -->
+    <div class="refs-subsection" data-aos="fade-up">
+      <div class="refs-disclaimer">
+        <p class="refs-disclaimer-text">
+          <strong>Disclaimer:</strong> ConnectHBG was created as a TSA Webmaster competition entry for educational purposes. Resource listings, event data, council member information, and government contact details are representative examples based on publicly available information and may not perfectly reflect current real-world details. This site is not affiliated with or endorsed by the City of Harrisonburg, Virginia or any organization listed herein. All crisis hotline numbers are real and active. For emergency services, always call 911.
+        </p>
+      </div>
+    </div>
+
+  </div>
+</section>
+
+<!-- ───────────────────────────────────────────────────────
+     FOOTER
+─────────────────────────────────────────────────────── -->
+<footer class="footer" role="contentinfo">
+  <div class="footer-inner">
+    <div class="footer-brand">
+      <div class="logo-icon-sm">
+        <span data-lucide="map-pin" class="w-4 h-4"></span>
+      </div>
+      <span class="logo-text-sm">Connect<span class="text-teal">HBG</span></span>
+      <p class="footer-tagline">Connecting Harrisonburg to the resources that matter most.</p>
+    </div>
+    <div class="footer-links">
+      <div class="footer-col">
+        <h4>Explore</h4>
+        <a href="index.html#directory">Resource Directory</a>
+        <a href="index.html#calendar">Community Calendar</a>
+        <a href="index.html#stories">Community Stories</a>
+        <a href="government.html">City Government</a>
+        <a href="crisis.html">Crisis Resources</a>
+        <a href="references.html" aria-current="page" style="color:var(--teal);font-weight:600">References</a>
+      </div>
+      <div class="footer-col">
+        <h4>Get Involved</h4>
+        <a href="index.html#submit">Submit a Resource</a>
+        <a href="index.html#calendar">Volunteer</a>
+      </div>
+      <div class="footer-col">
+        <h4>Accessibility</h4>
+        <button onclick="increaseFontSize()">Larger Text</button>
+        <button onclick="decreaseFontSize()">Smaller Text</button>
+        <button onclick="toggleTTS()">Text to Speech</button>
+        <button onclick="toggleDark()">Toggle Dark Mode</button>
+      </div>
+      <div class="footer-col">
+        <h4 class="footer-contact-heading">Contact</h4>
+        <div class="footer-contact-row">
+          <span data-lucide="mail" class="footer-contact-icon"></span>
+          <a href="mailto:info@connecthbg.org" class="footer-contact-link">info@connecthbg.org</a>
+        </div>
+        <div class="footer-contact-row">
+          <span data-lucide="phone" class="footer-contact-icon"></span>
+          <a href="tel:+15404344436" class="footer-contact-link">(540) 434-4436</a>
+        </div>
+        <div class="footer-contact-row">
+          <span data-lucide="map-pin" class="footer-contact-icon"></span>
+          <span class="footer-contact-text">409 S Main St, Harrisonburg, VA 22801</span>
+        </div>
+        <div class="footer-contact-row">
+          <span data-lucide="clock" class="footer-contact-icon"></span>
+          <span class="footer-contact-text">Mon – Fri, 8 AM – 5 PM</span>
+        </div>
+      </div>
+    </div>
+  </div>
+  <div class="footer-bottom">
+    <p>© 2026 ConnectHBG. Built for the TSA Webmaster Competition.</p>
+  </div>
+</footer>
+
+</main>
+
+<!-- ═══════════════════════════════════════════════════════
+     MODALS
+═══════════════════════════════════════════════════════ -->
+
+<!-- Story Detail Modal -->
+<div id="story-modal" class="modal-overlay hidden" role="dialog" aria-modal="true" aria-labelledby="story-modal-title" onclick="closeStoryModal(event)">
+  <div class="modal-box" style="max-width:740px">
+    <button onclick="closeStoryModal()" class="modal-close" aria-label="Close story">
+      <span data-lucide="x" class="w-5 h-5"></span>
+    </button>
+    <div id="story-modal-content"></div>
+  </div>
+</div>
+
+<!-- Resource Detail Modal -->
+<div id="resource-modal" class="modal-overlay hidden" role="dialog" aria-modal="true" aria-labelledby="modal-title" onclick="closeModal(event)">
+  <div class="modal-box">
+    <button onclick="closeResourceModal()" class="modal-close" aria-label="Close modal">
+      <span data-lucide="x" class="w-5 h-5"></span>
+    </button>
+    <div id="modal-content"></div>
+  </div>
+</div>
+
+<!-- Login Modal -->
+<div id="login-modal" class="modal-overlay hidden" role="dialog" aria-modal="true" aria-labelledby="login-modal-title" onclick="closeLoginModal(event)">
+  <div class="modal-box max-w-md" style="overflow:visible">
+    <button onclick="closeLoginModal()" class="modal-close" aria-label="Close login modal">
+      <span data-lucide="x" class="w-5 h-5"></span>
+    </button>
+    <div style="padding:32px 32px 28px">
+      <div style="text-align:center;margin-bottom:24px">
+        <div class="login-modal-avatar">
+          <span data-lucide="user-circle-2" class="w-10 h-10"></span>
+        </div>
+        <h2 id="login-modal-title" style="font-size:1.5rem;font-weight:800;color:var(--navy);margin:12px 0 4px">Welcome to ConnectHBG</h2>
+        <p style="color:var(--navy-600);font-size:13px">Sign in or create an account to save favorites and leave reviews</p>
+      </div>
+      <div class="login-tabs" role="tablist" aria-label="Sign in or register">
+        <button id="tab-signin" class="login-tab active" onclick="switchLoginTab('signin')" role="tab" aria-selected="true" aria-controls="panel-signin">Sign In</button>
+        <button id="tab-register" class="login-tab" onclick="switchLoginTab('register')" role="tab" aria-selected="false" aria-controls="panel-register">Create Account</button>
+      </div>
+      <div id="panel-signin" role="tabpanel" aria-labelledby="tab-signin">
+        <div id="login-error" class="login-error hidden" role="alert"></div>
+        <div style="margin-bottom:14px">
+          <label style="font-size:12px;font-weight:700;color:var(--navy-600);text-transform:uppercase;letter-spacing:.4px;display:block;margin-bottom:6px">Username</label>
+          <input type="text" id="login-username" class="form-input" placeholder="Enter your username" aria-label="Username" autocomplete="username" />
+        </div>
+        <div style="margin-bottom:20px">
+          <label style="font-size:12px;font-weight:700;color:var(--navy-600);text-transform:uppercase;letter-spacing:.4px;display:block;margin-bottom:6px">Password</label>
+          <div style="position:relative">
+            <input type="password" id="login-password" class="form-input" placeholder="Enter your password" aria-label="Password" autocomplete="current-password" style="padding-right:44px" />
+            <button type="button" onclick="togglePasswordVis('login-password', this)" style="position:absolute;right:12px;top:50%;transform:translateY(-50%);color:var(--navy-600);background:none;border:none;cursor:pointer;display:flex;align-items:center" aria-label="Toggle password visibility">
+              <span data-lucide="eye" class="w-4 h-4"></span>
+            </button>
+          </div>
+        </div>
+        <button onclick="submitLogin()" class="form-submit-btn" style="margin-top:0">
+          <span data-lucide="log-in" class="w-5 h-5"></span>
+          Sign In
+        </button>
+        <div style="margin-top:16px;padding:12px 16px;background:rgba(20,184,166,.06);border-radius:10px;border:1px solid rgba(20,184,166,.12)">
+          <p style="font-size:11px;font-weight:700;color:var(--teal-dark);margin:0 0 6px;text-transform:uppercase;letter-spacing:.4px">Competition Judge Access</p>
+          <p style="font-size:12px;color:var(--navy-600);margin:0">Username: <strong>judge</strong> &nbsp;|&nbsp; Password: <strong>TSA2026!</strong></p>
+        </div>
+      </div>
+      <div id="panel-register" role="tabpanel" aria-labelledby="tab-register" class="hidden">
+        <div id="register-error" class="login-error hidden" role="alert"></div>
+        <div style="margin-bottom:14px">
+          <div style="margin-bottom:12px">
+            <label style="font-size:12px;font-weight:700;color:var(--navy-600);text-transform:uppercase;letter-spacing:.4px;display:block;margin-bottom:6px">Display Name</label>
+            <input type="text" id="reg-displayname" class="form-input" placeholder="Your name" aria-label="Display name" />
+          </div>
+          <div>
+            <label style="font-size:12px;font-weight:700;color:var(--navy-600);text-transform:uppercase;letter-spacing:.4px;display:block;margin-bottom:6px">Username</label>
+            <input type="text" id="reg-username" class="form-input" placeholder="Choose username" aria-label="Username" autocomplete="username" />
+          </div>
+        </div>
+        <div style="margin-bottom:12px">
+          <label style="font-size:12px;font-weight:700;color:var(--navy-600);text-transform:uppercase;letter-spacing:.4px;display:block;margin-bottom:6px">Password</label>
+          <input type="password" id="reg-password" class="form-input" placeholder="Create a password" aria-label="Password" autocomplete="new-password" />
+        </div>
+        <div style="margin-bottom:20px">
+          <label style="font-size:12px;font-weight:700;color:var(--navy-600);text-transform:uppercase;letter-spacing:.4px;display:block;margin-bottom:6px">Confirm Password</label>
+          <input type="password" id="reg-confirm" class="form-input" placeholder="Confirm password" aria-label="Confirm password" autocomplete="new-password" />
+        </div>
+        <button onclick="submitRegister()" class="form-submit-btn" style="margin-top:0">
+          <span data-lucide="user-plus" class="w-5 h-5"></span>
+          Create Account
+        </button>
+        <p style="font-size:11px;color:var(--navy-600);text-align:center;margin-top:14px">By creating an account you agree to our community guidelines.</p>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Account Dashboard Panel -->
+<div id="account-dashboard" class="account-panel hidden" role="dialog" aria-modal="true" aria-label="Account Dashboard">
+  <div class="account-panel-overlay" onclick="closeAccountDashboard()"></div>
+  <div class="account-panel-inner" role="document">
+    <div class="account-panel-scroll">
+      <div class="account-panel-header">
+        <h2 style="font-size:17px;font-weight:800;color:var(--navy)">My Account</h2>
+        <button onclick="closeAccountDashboard()" class="modal-close" style="position:static;float:none;margin:0" aria-label="Close account">
+          <span data-lucide="x" class="w-5 h-5"></span>
+        </button>
+      </div>
+      <div class="account-profile-card">
+        <div id="account-avatar" class="account-avatar">?</div>
+        <div class="account-profile-info">
+          <div id="account-displayname" class="account-name">—</div>
+          <div id="account-username-display" class="account-handle">@—</div>
+          <span id="account-role-badge" class="account-role-badge">Member</span>
+        </div>
+        <button onclick="signOut()" class="account-signout-btn" title="Sign out">
+          <span data-lucide="log-out" class="w-4 h-4"></span>
+        </button>
+      </div>
+      <div class="account-stats-row">
+        <div class="account-stat"><span id="acc-events-count" class="account-stat-num">0</span><span class="account-stat-lbl">Registered</span></div>
+        <div class="account-stat"><span id="acc-favs-count" class="account-stat-num">0</span><span class="account-stat-lbl">Favorites</span></div>
+        <div class="account-stat"><span id="acc-reviews-count" class="account-stat-num">0</span><span class="account-stat-lbl">Reviews</span></div>
+        <div class="account-stat"><span id="acc-submissions-count" class="account-stat-num">0</span><span class="account-stat-lbl">Submitted</span></div>
+      </div>
+      <div class="account-section" id="acc-submissions-section" style="display:none">
+        <div class="account-section-header">
+          <h3 class="account-section-title"><span data-lucide="send" class="w-4 h-4"></span> My Submissions</h3>
+          <a href="index.html#submit" onclick="closeAccountDashboard()" class="account-section-link">Submit Resource</a>
+        </div>
+        <div id="account-submissions-list" class="account-events-list">
+          <p class="account-empty-msg">No submissions yet</p>
+        </div>
+      </div>
+      <div class="account-section">
+        <div class="account-section-header">
+          <h3 class="account-section-title"><span data-lucide="calendar-check" class="w-4 h-4"></span> Registered Events</h3>
+        </div>
+        <div id="account-events-list" class="account-events-list">
+          <p class="account-empty-msg">No events registered yet</p>
+        </div>
+      </div>
+      <div class="account-section">
+        <div class="account-section-header">
+          <h3 class="account-section-title"><span data-lucide="heart" class="w-4 h-4"></span> Saved Favorites</h3>
+          <a href="index.html#favorites" onclick="closeAccountDashboard()" class="account-section-link">View all</a>
+        </div>
+        <div id="account-favs-preview" class="account-favs-preview"></div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Issue Report Modal -->
+<div id="issue-modal" class="modal-overlay hidden" role="dialog" aria-modal="true" aria-labelledby="issue-modal-title" onclick="closeIssueModal(event)">
+  <div class="modal-box" style="max-width:540px">
+    <button onclick="closeIssueModalDirect()" class="modal-close" aria-label="Close modal">
+      <span data-lucide="x" class="w-5 h-5"></span>
+    </button>
+    <div class="modal-body">
+      <h2 id="issue-modal-title" style="font-size:1.25rem;font-weight:700;color:var(--navy);margin:0 0 24px">Report an Issue</h2>
+      <form id="issue-form" novalidate>
+        <div class="form-group" style="margin-bottom:16px">
+          <label class="form-label" for="issue-type">Issue Type <span class="required">*</span></label>
+          <select id="issue-type" class="form-input" aria-label="Issue type" aria-required="true" required>
+            <option value="">Select issue type</option>
+            <option>Pothole</option>
+            <option>Broken Streetlight</option>
+            <option>Fallen Tree</option>
+            <option>Graffiti</option>
+            <option>Sidewalk Damage</option>
+            <option>Other</option>
+          </select>
+        </div>
+        <div class="form-group" style="margin-bottom:16px">
+          <label class="form-label" for="issue-location">Location <span class="required">*</span></label>
+          <input id="issue-location" type="text" class="form-input" placeholder="Where is the issue? (address or intersection)" aria-label="Issue location" aria-required="true" required />
+        </div>
+        <div class="form-group" style="margin-bottom:16px">
+          <label class="form-label" for="issue-description">Description</label>
+          <textarea id="issue-description" class="form-textarea" rows="4" placeholder="Describe the issue..." aria-label="Issue description"></textarea>
+        </div>
+        <div class="form-group" style="margin-bottom:20px">
+          <label class="form-label">Photo <span style="font-weight:400;color:var(--navy-600)">(optional)</span></label>
+          <div class="issue-photo-drop" id="issue-photo-drop" onclick="document.getElementById('issue-photo-input').click()" role="button" tabindex="0" aria-label="Upload a photo of the issue">
+            <span data-lucide="upload" class="w-8 h-8"></span>
+            <p>Drag and drop a photo here, or browse</p>
+            <input id="issue-photo-input" type="file" accept="image/*" class="hidden" onchange="handleIssuePhoto(event)" aria-label="Choose photo" />
+          </div>
+          <div id="issue-photo-name" class="issue-photo-name hidden"></div>
+        </div>
+        <button type="button" onclick="submitIssueReport()" class="form-submit-btn" aria-label="Submit issue report">
+          <span data-lucide="send" class="w-5 h-5"></span>
+          Submit Report
+        </button>
+      </form>
+    </div>
+  </div>
+</div>
+
+<!-- News Detail Modal -->
+<div id="news-detail-modal" class="modal-overlay hidden" role="dialog" aria-modal="true" aria-labelledby="news-detail-heading" onclick="closeNewsDetailModal(event)">
+  <div class="modal-box" style="max-width:780px;padding:0;overflow:hidden">
+    <button onclick="closeNewsDetailModalDirect()" class="modal-close" aria-label="Close article">
+      <span data-lucide="x" class="w-5 h-5"></span>
+    </button>
+    <div id="news-detail-content"></div>
+  </div>
+</div>
+
+<!-- Story Submission Modal -->
+<div id="story-submit-modal" class="modal-overlay hidden" role="dialog" aria-modal="true" aria-labelledby="story-submit-title" onclick="closeStorySubmitModal(event)">
+  <div class="modal-box" style="max-width:560px">
+    <button onclick="closeStorySubmitModalDirect()" class="modal-close" aria-label="Close">
+      <span data-lucide="x" class="w-5 h-5"></span>
+    </button>
+    <div class="modal-body">
+      <div style="display:flex;align-items:center;gap:10px;margin-bottom:20px">
+        <div class="login-modal-avatar" style="width:44px;height:44px;font-size:20px">✍️</div>
+        <div>
+          <h2 id="story-submit-title" style="font-size:1.2rem;font-weight:800;color:var(--navy);margin:0">Write a Story</h2>
+          <p style="font-size:13px;color:var(--navy-600);margin:2px 0 0">Share something meaningful happening in Harrisonburg</p>
+        </div>
+      </div>
+      <form id="story-submit-form" novalidate>
+        <div class="form-group" style="margin-bottom:14px">
+          <label class="form-label" for="story-title-input">Headline <span class="required">*</span></label>
+          <input id="story-title-input" type="text" class="form-input" placeholder="What's your story about?" maxlength="120" aria-required="true" />
+        </div>
+        <div class="form-group" style="margin-bottom:14px">
+          <label class="form-label" for="story-category-select">Category</label>
+          <select id="story-category-select" class="form-input" aria-label="Story category">
+            <option value="Community">Community</option>
+            <option value="Government">Government</option>
+            <option value="Health">Health</option>
+            <option value="Education">Education</option>
+            <option value="Food">Food</option>
+            <option value="Housing">Housing</option>
+            <option value="Environment">Environment</option>
+          </select>
+        </div>
+        <div class="form-group" style="margin-bottom:20px">
+          <label class="form-label" for="story-body-input">Your Story <span class="required">*</span></label>
+          <textarea id="story-body-input" class="form-textarea" rows="6" placeholder="Tell the community what's happening…" aria-required="true"></textarea>
+        </div>
+        <button type="button" onclick="submitStory()" class="form-submit-btn" aria-label="Submit your story">
+          <span data-lucide="send" class="w-5 h-5"></span>
+          Submit Story
+        </button>
+      </form>
+    </div>
+  </div>
+</div>
+
+<!-- Donate Modal -->
+<div id="donate-modal" class="modal-overlay hidden" role="dialog" aria-modal="true" aria-labelledby="donate-modal-heading" onclick="closeDonateModal(event)">
+  <div class="modal-box" style="max-width:460px">
+    <button onclick="closeDonateModalDirect()" class="modal-close" aria-label="Close">
+      <span data-lucide="x" class="w-5 h-5"></span>
+    </button>
+    <div class="modal-body">
+      <div id="donate-step-1">
+        <div style="text-align:center;margin-bottom:20px">
+          <div class="login-modal-avatar" style="background:linear-gradient(135deg,#EF4444,#F97316);color:#fff;width:52px;height:52px;font-size:24px">❤</div>
+          <h2 id="donate-modal-heading" style="font-size:1.15rem;font-weight:800;color:var(--navy);margin:12px 0 2px">Make a Donation</h2>
+          <p id="donate-modal-title" style="font-size:14px;font-weight:600;color:var(--teal);margin:0 0 2px"></p>
+          <p id="donate-modal-org" style="font-size:12px;color:var(--navy-600);margin:0"></p>
+        </div>
+        <p style="font-size:13px;font-weight:600;color:var(--navy);margin:0 0 10px">Choose an amount</p>
+        <div class="donate-chips-row" role="group" aria-label="Preset donation amounts">
+          <button class="donate-chip" data-amount="5" onclick="selectDonateChip(5)">$5</button>
+          <button class="donate-chip" data-amount="10" onclick="selectDonateChip(10)">$10</button>
+          <button class="donate-chip active" data-amount="25" onclick="selectDonateChip(25)">$25</button>
+          <button class="donate-chip" data-amount="50" onclick="selectDonateChip(50)">$50</button>
+          <button class="donate-chip" data-amount="100" onclick="selectDonateChip(100)">$100</button>
+        </div>
+        <div class="form-group" style="margin:14px 0 20px">
+          <label class="form-label" for="donate-custom-input">Or enter a custom amount ($)</label>
+          <input id="donate-custom-input" type="number" min="1" step="1" class="form-input" placeholder="e.g. 75" oninput="onCustomDonateInput()" aria-label="Custom donation amount" />
+        </div>
+        <button type="button" onclick="proceedToPayment()" class="form-submit-btn donate-confirm-btn" aria-label="Proceed to payment">
+          <span data-lucide="heart" class="w-5 h-5"></span>
+          Donate Now
+        </button>
+      </div>
+      <div id="donate-step-2" class="hidden">
+        <div style="text-align:center;margin-bottom:18px">
+          <div class="login-modal-avatar" style="background:linear-gradient(135deg,#14B8A6,#0D9488);color:#fff;width:52px;height:52px">
+            <span data-lucide="credit-card" class="w-6 h-6"></span>
+          </div>
+          <h2 style="font-size:1.1rem;font-weight:800;color:var(--navy);margin:12px 0 2px">Payment Information</h2>
+          <p id="donate-payment-amount" style="font-size:14px;font-weight:700;color:var(--teal);margin:0"></p>
+        </div>
+        <div id="donate-payment-error" class="hidden" style="background:rgba(239,68,68,.08);border:1px solid rgba(239,68,68,.2);border-radius:8px;padding:10px 14px;font-size:13px;color:#EF4444;margin-bottom:14px"></div>
+        <div class="form-group">
+          <label class="form-label" for="pay-name">Cardholder Name</label>
+          <input id="pay-name" type="text" class="form-input" placeholder="Jane Smith" autocomplete="cc-name" />
+        </div>
+        <div class="form-group">
+          <label class="form-label" for="pay-card">Card Number</label>
+          <input id="pay-card" type="text" class="form-input" placeholder="1234 5678 9012 3456" maxlength="19" oninput="formatCardNumber(this)" autocomplete="cc-number" />
+        </div>
+        <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:10px">
+          <div class="form-group" style="margin:0">
+            <label class="form-label" for="pay-exp">Expiry</label>
+            <input id="pay-exp" type="text" class="form-input" placeholder="MM/YY" maxlength="5" oninput="formatExpiry(this)" autocomplete="cc-exp" />
+          </div>
+          <div class="form-group" style="margin:0">
+            <label class="form-label" for="pay-cvv">CVV</label>
+            <input id="pay-cvv" type="password" class="form-input" placeholder="•••" maxlength="4" autocomplete="cc-csc" />
+          </div>
+          <div class="form-group" style="margin:0">
+            <label class="form-label" for="pay-zip">ZIP</label>
+            <input id="pay-zip" type="text" class="form-input" placeholder="22801" maxlength="5" autocomplete="postal-code" />
+          </div>
+        </div>
+        <button type="button" onclick="completeDonation()" class="form-submit-btn donate-confirm-btn" style="margin-top:16px" aria-label="Complete donation">
+          <span data-lucide="lock" class="w-4 h-4"></span>
+          Complete Donation
+        </button>
+        <button type="button" onclick="backToAmount()" style="display:block;width:100%;text-align:center;margin-top:10px;font-size:13px;color:var(--teal);background:none;border:none;cursor:pointer">← Back</button>
+        <p style="font-size:11px;text-align:center;color:var(--navy-600);margin-top:12px;line-height:1.5">This is a demonstration project for the TSA Webmaster Competition. No real payment is processed.</p>
+      </div>
+      <div id="donate-step-3" class="hidden" style="text-align:center;padding:32px 0">
+        <div class="ai-thinking-dots" style="justify-content:center;margin-bottom:16px"><span></span><span></span><span></span></div>
+        <p style="font-size:14px;font-weight:600;color:var(--navy-600)">Processing your donation…</p>
+      </div>
+      <div id="donate-step-4" class="hidden" style="text-align:center;padding:32px 0">
+        <div style="width:64px;height:64px;background:linear-gradient(135deg,#10B981,#059669);border-radius:50%;display:flex;align-items:center;justify-content:center;margin:0 auto 16px">
+          <span data-lucide="check" style="width:32px;height:32px;color:white"></span>
+        </div>
+        <h3 id="donate-success-msg" style="font-size:1.1rem;font-weight:800;color:var(--navy);margin:0 0 8px"></h3>
+        <p id="donate-success-title" style="font-size:13px;color:var(--navy-600);margin:0 0 20px"></p>
+        <button onclick="closeDonateModalDirect()" class="form-submit-btn" aria-label="Done">Done</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Create Fundraiser Modal -->
+<div id="create-fundraiser-modal" class="modal-overlay hidden" role="dialog" aria-modal="true" aria-labelledby="create-fundraiser-title" onclick="closeCreateFundraiserModal(event)">
+  <div class="modal-box" style="max-width:540px">
+    <button onclick="closeCreateFundraiserModalDirect()" class="modal-close" aria-label="Close">
+      <span data-lucide="x" class="w-5 h-5"></span>
+    </button>
+    <div class="modal-body">
+      <div style="display:flex;align-items:center;gap:10px;margin-bottom:20px">
+        <div class="login-modal-avatar" style="width:44px;height:44px;font-size:20px">🚀</div>
+        <div>
+          <h2 id="create-fundraiser-title" style="font-size:1.2rem;font-weight:800;color:var(--navy);margin:0">Start a Fundraiser</h2>
+          <p style="font-size:13px;color:var(--navy-600);margin:2px 0 0">Rally the community behind a cause you care about</p>
+        </div>
+      </div>
+      <form id="create-fundraiser-form" novalidate>
+        <div class="form-group" style="margin-bottom:14px">
+          <label class="form-label" for="fundraiser-title-input">Fundraiser Title <span class="required">*</span></label>
+          <input id="fundraiser-title-input" type="text" class="form-input" placeholder="What are you raising funds for?" maxlength="100" aria-required="true" />
+        </div>
+        <div class="form-group" style="margin-bottom:14px">
+          <label class="form-label" for="fundraiser-cat-select">Category</label>
+          <select id="fundraiser-cat-select" class="form-input" aria-label="Fundraiser category">
+            <option>Community</option><option>Education</option><option>Food</option>
+            <option>Health</option><option>Housing</option><option>Parks</option>
+          </select>
+        </div>
+        <div class="form-group" style="margin-bottom:14px">
+          <label class="form-label" for="fundraiser-goal-input">Funding Goal ($) <span class="required">*</span></label>
+          <input id="fundraiser-goal-input" type="number" min="100" step="100" class="form-input" placeholder="e.g. 5000" aria-required="true" />
+        </div>
+        <div class="form-group" style="margin-bottom:20px">
+          <label class="form-label" for="fundraiser-desc-input">Description <span class="required">*</span></label>
+          <textarea id="fundraiser-desc-input" class="form-textarea" rows="4" placeholder="Describe your project and how the funds will be used…" aria-required="true"></textarea>
+        </div>
+        <button type="button" onclick="submitFundraiser()" class="form-submit-btn" aria-label="Submit fundraiser">
+          <span data-lucide="send" class="w-5 h-5"></span>
+          Submit Fundraiser
+        </button>
+      </form>
+    </div>
+  </div>
+</div>
+
+<!-- Calendar Dialog -->
+<div id="calendar-dialog" class="cal-dialog-overlay hidden" role="dialog" aria-modal="true" aria-label="Add to calendar" onclick="if(event.target===this)dismissCalendarDialog()"></div>
+
+<!-- Toast Notification -->
+<div id="toast" class="toast hidden" role="alert" aria-live="assertive" aria-atomic="true"></div>
+
+<!-- Three.js for 3D World Explorer -->
+<script src="https://cdn.jsdelivr.net/npm/three@0.128.0/build/three.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/three@0.128.0/examples/js/controls/PointerLockControls.js"></script>
+
+<!-- ═══════════════════════════════════════════════════════
+     FLOATING AI CHATBOT FAB
+═══════════════════════════════════════════════════════ -->
+<div id="chat-panel" class="chat-panel hidden" role="dialog" aria-label="Community Assistant" aria-modal="true">
+  <div class="chat-header">
+    <div class="chat-header-icon" aria-hidden="true">
+      <span data-lucide="sparkles" class="w-4 h-4"></span>
+    </div>
+    <div class="chat-header-text">
+      <div class="chat-header-title">Community Assistant</div>
+      <div class="chat-header-sub">Ask me anything about Harrisonburg resources</div>
+    </div>
+    <button onclick="closeChatPanel()" class="chat-header-close" aria-label="Close chat">
+      <span data-lucide="x" class="w-4 h-4"></span>
+    </button>
+  </div>
+  <div id="chat-messages" class="chat-messages" role="log" aria-live="polite" aria-label="Chat messages"></div>
+  <div class="chat-input-bar">
+    <input id="chat-input" class="chat-input" type="text" placeholder="Type a message..." aria-label="Type your message" maxlength="300" />
+    <button id="chat-send-btn" class="chat-send-btn" onclick="chatSend()" aria-label="Send message">
+      <span data-lucide="send" class="w-4 h-4"></span>
+    </button>
+  </div>
+</div>
+
+<button id="chat-fab" class="chat-fab btn-pulse" onclick="toggleChatPanel()" aria-label="Open community assistant" aria-expanded="false">
+  <span id="chat-fab-icon" data-lucide="message-circle" class="w-6 h-6"></span>
+</button>
+
+<!-- Data scripts -->
+<script src="data/resources.js"></script>
+<script src="data/extra-content.js"></script>
+<script src="app.js"></script>
+
+<!-- Feature Enhancements -->
+<script src="features/smart-map.js"></script>
+<script src="features/ai-match.js"></script>
+<script src="features/premium-ux.js"></script>
+<script src="features/government-crisis.js"></script>
+<script src="features/news-donate.js"></script>
+<script src="features/extras.js"></script>
+
+<!-- Chatbot + Donation Flow -->
+<script src="chatbot_donate.js"></script>
+</body>
+</html>

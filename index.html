@@ -1,0 +1,1708 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>ConnectHBG — Community Resource Hub</title>
+
+  <!-- Fonts -->
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&display=swap" rel="stylesheet" />
+
+  <!-- Tailwind CDN -->
+  <script src="https://cdn.tailwindcss.com"></script>
+
+  <!-- Leaflet Map -->
+  <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
+  <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+
+  <!-- Leaflet MarkerCluster (smart map clustering) -->
+  <link rel="stylesheet" href="https://unpkg.com/leaflet.markercluster@1.5.3/dist/MarkerCluster.css" />
+  <link rel="stylesheet" href="https://unpkg.com/leaflet.markercluster@1.5.3/dist/MarkerCluster.Default.css" />
+  <script src="https://unpkg.com/leaflet.markercluster@1.5.3/dist/leaflet.markercluster.js"></script>
+
+  <!-- Leaflet Heat (density heatmap) -->
+  <script src="https://unpkg.com/leaflet.heat@0.2.0/dist/leaflet-heat.js"></script>
+
+  <!-- ECharts + ECharts-GL for advanced 3D charts -->
+  <script src="https://cdn.jsdelivr.net/npm/echarts@5/dist/echarts.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/echarts-gl@2/dist/echarts-gl.min.js"></script>
+
+  <!-- AOS scroll animations -->
+  <link href="https://unpkg.com/aos@2.3.1/dist/aos.css" rel="stylesheet" />
+  <script src="https://unpkg.com/aos@2.3.1/dist/aos.js"></script>
+
+  <!-- Lucide Icons -->
+  <script src="https://unpkg.com/lucide@latest"></script>
+
+  <!-- Custom Styles -->
+  <link rel="stylesheet" href="styles.css" />
+
+  <script>
+    tailwind.config = {
+      theme: {
+        extend: {
+          colors: {
+            navy: { DEFAULT: '#0F172A', 800: '#1E293B', 700: '#334155', 600: '#475569' },
+            teal: { DEFAULT: '#14B8A6', light: '#5EEAD4', dark: '#0D9488' },
+            purple: { DEFAULT: '#8B5CF6', light: '#C4B5FD', dark: '#7C3AED' }
+          },
+          fontFamily: { sans: ['Inter', 'sans-serif'] }
+        }
+      }
+    }
+  </script>
+</head>
+
+<body class="font-sans bg-slate-50 text-navy antialiased" id="app-body">
+
+<!-- ═══════════════════════════════════════════════════════
+     SKIP LINK (accessibility)
+═══════════════════════════════════════════════════════ -->
+<a href="#main-content" class="skip-link">Skip to main content</a>
+
+<!-- ═══════════════════════════════════════════════════════
+     ACCESSIBILITY TOOLBAR (collapsible)
+═══════════════════════════════════════════════════════ -->
+<div id="a11y-bar" class="a11y-bar" role="toolbar" aria-label="Accessibility tools">
+  <!-- Toggle button (always visible) -->
+  <button id="a11y-toggle-btn" class="a11y-toggle-btn" onclick="toggleA11yBar()" title="Accessibility options" aria-label="Toggle accessibility options" aria-expanded="false">
+    <span data-lucide="accessibility" class="w-5 h-5"></span>
+  </button>
+  <!-- Expandable controls -->
+  <div id="a11y-controls" class="a11y-controls" aria-hidden="true">
+    <span class="a11y-label">Accessibility</span>
+    <button onclick="increaseFontSize()" title="Increase text size" aria-label="Increase font size">
+      <span class="font-bold text-xs">A+</span>
+    </button>
+    <button onclick="decreaseFontSize()" title="Decrease text size" aria-label="Decrease font size">
+      <span class="text-xs">A-</span>
+    </button>
+    <button onclick="toggleTTS()" title="Text to speech" id="btn-tts" aria-pressed="false">
+      <span data-lucide="volume-2" class="w-4 h-4"></span>
+    </button>
+  </div>
+</div>
+
+<!-- ═══════════════════════════════════════════════════════
+     ANNOUNCEMENT BANNER
+═══════════════════════════════════════════════════════ -->
+<div id="announcement-banner" class="announcement-banner" role="banner">
+  <div class="announcement-inner">
+    <span data-lucide="megaphone" class="w-4 h-4 flex-shrink-0"></span>
+    <div id="announcement-text" class="announcement-ticker"></div>
+  </div>
+  <button onclick="document.getElementById('announcement-banner').style.display='none'" aria-label="Dismiss announcement">
+    <span data-lucide="x" class="w-4 h-4"></span>
+  </button>
+</div>
+
+<!-- ═══════════════════════════════════════════════════════
+     NAVIGATION
+═══════════════════════════════════════════════════════ -->
+<nav id="navbar" class="navbar" role="navigation" aria-label="Main navigation">
+  <div class="nav-inner">
+    <!-- Logo -->
+    <a href="#" class="nav-logo" aria-label="ConnectHBG Home">
+      <div class="logo-icon">
+        <span data-lucide="map-pin" class="w-5 h-5"></span>
+      </div>
+      <span class="logo-text">Connect<span class="text-teal">HBG</span></span>
+    </a>
+
+    <!-- Desktop Nav Links -->
+    <div class="nav-links" role="list">
+      <a href="#news" class="nav-link" role="listitem">News</a>
+      <a href="#directory" class="nav-link" role="listitem">Directory</a>
+      <a href="#calendar" class="nav-link" role="listitem">Events</a>
+      <a href="#donate" class="nav-link" role="listitem">Donate</a>
+      <a href="#stories" class="nav-link" role="listitem">Stories</a>
+      <a href="#favorites" class="nav-link nav-link-fav" role="listitem">
+        <span data-lucide="heart" class="w-4 h-4"></span>
+        Favorites
+        <span id="fav-count-badge" class="fav-count-badge hidden">0</span>
+      </a>
+      <a href="government.html" class="nav-link" role="listitem">Government</a>
+      <a href="crisis.html" class="nav-link nav-link-crisis" role="listitem" aria-label="Crisis resources — emergency help available">Crisis</a>
+      <a href="references.html" class="nav-link" role="listitem">References</a>
+    </div>
+
+    <!-- Nav Actions -->
+    <div class="nav-actions">
+      <button onclick="toggleDark()" class="icon-btn" title="Toggle dark mode" aria-label="Toggle dark mode" id="dark-toggle">
+        <span data-lucide="moon" class="w-5 h-5" id="dark-icon"></span>
+      </button>
+      <button onclick="startVoice()" class="icon-btn" title="Voice search" aria-label="Voice search" id="voice-btn">
+        <span data-lucide="mic" class="w-5 h-5"></span>
+      </button>
+      <button onclick="openLoginModal()" class="btn-primary-sm">
+        <span data-lucide="user" class="w-4 h-4"></span>
+        Sign In
+      </button>
+      <!-- Mobile menu toggle -->
+      <button id="mobile-menu-btn" class="icon-btn md:hidden" onclick="toggleMobileMenu()" aria-label="Open menu" aria-expanded="false">
+        <span data-lucide="menu" class="w-5 h-5"></span>
+      </button>
+    </div>
+  </div>
+
+  <!-- Mobile Menu -->
+  <div id="mobile-menu" class="mobile-menu hidden" role="menu">
+    <a href="#news" class="mobile-link" onclick="toggleMobileMenu()">📰 News</a>
+    <a href="#directory" class="mobile-link" onclick="toggleMobileMenu()">Directory</a>
+    <a href="#calendar" class="mobile-link" onclick="toggleMobileMenu()">Events</a>
+    <a href="#donate" class="mobile-link" onclick="toggleMobileMenu()">❤ Donate</a>
+    <a href="#stories" class="mobile-link" onclick="toggleMobileMenu()">Stories</a>
+    <a href="#favorites" class="mobile-link" onclick="toggleMobileMenu()">❤ Favorites</a>
+    <a href="government.html" class="mobile-link" onclick="toggleMobileMenu()">🏛 Government</a>
+    <a href="crisis.html" class="mobile-link mobile-link-crisis" onclick="toggleMobileMenu()">Crisis — Emergency Help</a>
+    <a href="references.html" class="mobile-link" onclick="toggleMobileMenu()">📋 References</a>
+    <a href="#submit" class="mobile-link" onclick="toggleMobileMenu()">Submit</a>
+    <a href="#dashboard" class="mobile-link" onclick="toggleMobileMenu()">Dashboard</a>
+  </div>
+</nav>
+
+<!-- ═══════════════════════════════════════════════════════
+     MAIN CONTENT
+═══════════════════════════════════════════════════════ -->
+<main id="main-content">
+
+<!-- ───────────────────────────────────────────────────────
+     HERO SECTION
+─────────────────────────────────────────────────────── -->
+<section class="hero-section" id="hero" aria-labelledby="hero-heading">
+  <!-- Animated background particles -->
+  <div class="hero-bg" aria-hidden="true">
+    <div class="hero-orb hero-orb-1"></div>
+    <div class="hero-orb hero-orb-2"></div>
+    <div class="hero-orb hero-orb-3"></div>
+    <div class="hero-grid"></div>
+  </div>
+
+  <div class="hero-content">
+    <!-- Badge -->
+    <div class="hero-badge" data-aos="fade-down" data-aos-delay="100">
+      <span data-lucide="sparkles" class="w-4 h-4"></span>
+      Harrisonburg, Virginia
+    </div>
+
+    <!-- Headline -->
+    <h1 id="hero-heading" class="hero-headline" data-aos="fade-up" data-aos-delay="200">
+      Connecting Our Community<br />
+      <span class="hero-headline-accent">to the Resources</span><br />
+      That Matter Most
+    </h1>
+
+    <!-- Subheadline -->
+    <p class="hero-sub" data-aos="fade-up" data-aos-delay="300">
+      Discover non-profits, support services, events, and volunteer opportunities — all in one place, built for every resident.
+    </p>
+
+    <!-- Animated Single Hero Search Bar -->
+    <div class="hero-search-wrap" id="hero-search-wrap" data-aos="fade-up" data-aos-delay="400" role="search" aria-label="Search community resources">
+      <div class="hero-search-inner">
+        <div class="hero-typing-overlay" id="hero-typing-overlay" aria-hidden="true">
+          <span id="hero-typing-text"></span><span class="hero-typing-cursor">|</span>
+        </div>
+        <input
+          id="hero-search"
+          class="hero-search-input"
+          type="text"
+          autocomplete="off"
+          aria-label="Search community resources"
+          aria-autocomplete="list"
+          aria-controls="hero-autocomplete"
+        />
+        <button class="hero-search-btn" onclick="jumpToDirectory()" aria-label="Search resources">
+          <span data-lucide="search" style="width:18px;height:18px"></span>
+          Search
+        </button>
+      </div>
+      <div id="hero-autocomplete" class="autocomplete-dropdown hidden" role="listbox" aria-label="Search suggestions"></div>
+    </div>
+
+    <!-- Hero CTAs -->
+    <div class="hero-ctas" data-aos="fade-up" data-aos-delay="500">
+      <a href="#directory" class="btn-hero-primary">
+        <span data-lucide="compass" class="w-5 h-5"></span>
+        Browse All Resources
+      </a>
+      <a href="#submit" class="btn-hero-secondary">
+        <span data-lucide="plus-circle" class="w-5 h-5"></span>
+        Submit a Resource
+      </a>
+    </div>
+
+    <!-- Quick category chips -->
+    <div class="hero-chips" data-aos="fade-up" data-aos-delay="600">
+      <button onclick="filterByCategory('Food')" class="chip">🍎 Food</button>
+      <button onclick="filterByCategory('Health')" class="chip">🏥 Health</button>
+      <button onclick="filterByCategory('Education')" class="chip">📚 Education</button>
+      <button onclick="filterByCategory('Housing')" class="chip">🏠 Housing</button>
+      <button onclick="filterByCategory('Volunteer')" class="chip">🤝 Volunteer</button>
+      <button onclick="filterByCategory('Support')" class="chip">💛 Support</button>
+    </div>
+  </div>
+
+  <!-- Hero Stats Bar -->
+  <div class="hero-stats" data-aos="fade-up" data-aos-delay="700" aria-label="Community statistics">
+    <div class="stat-item">
+      <span class="stat-number" data-target="15">0</span>
+      <span class="stat-label">Resources Listed</span>
+    </div>
+    <div class="stat-divider" aria-hidden="true"></div>
+    <div class="stat-item">
+      <span class="stat-number" data-target="16">0</span>
+      <span class="stat-label">Upcoming Events</span>
+    </div>
+    <div class="stat-divider" aria-hidden="true"></div>
+    <div class="stat-item">
+      <span class="stat-number" data-target="1200">0</span>
+      <span class="stat-label">Families Served</span>
+    </div>
+    <div class="stat-divider" aria-hidden="true"></div>
+    <div class="stat-item">
+      <span class="stat-number" data-target="340">0</span>
+      <span class="stat-label">Active Volunteers</span>
+    </div>
+  </div>
+
+  <!-- Scroll-down indicator -->
+  <button class="scroll-down-indicator" id="scroll-indicator" onclick="scrollToHowItWorks()" aria-label="Scroll down to explore">
+    <span class="scroll-down-text">SCROLL DOWN</span>
+    <span data-lucide="chevron-down" class="scroll-down-icon"></span>
+  </button>
+</section>
+
+<!-- ──────────────────────────────────────────────────���────
+     HOW IT WORKS
+───────────────────────────────────────��─────────────── -->
+<section class="section-wrapper how-it-works-section" id="how-it-works" aria-labelledby="hiw-heading">
+  <div class="section-inner">
+    <div class="section-header" data-aos="fade-up">
+      <h2 id="hiw-heading" class="section-title" data-i18n="hiw.title">How ConnectHBG Works</h2>
+    </div>
+    <div class="hiw-cards">
+      <div class="hiw-card" data-aos="fade-up" data-aos-delay="0">
+        <div class="hiw-icon-wrap" aria-hidden="true">
+          <span data-lucide="search" class="hiw-icon"></span>
+        </div>
+        <h3 class="hiw-card-title">Resource Directory</h3>
+        <p class="hiw-card-desc">Browse 15+ local nonprofits, programs, and events. Filter by category, search by keyword, and save your favorites.</p>
+        <a href="#directory" class="hiw-cta" onclick="document.getElementById('directory').scrollIntoView({behavior:'smooth'});return false;">Explore Resources →</a>
+      </div>
+      <div class="hiw-card" data-aos="fade-up" data-aos-delay="100">
+        <div class="hiw-icon-wrap" aria-hidden="true">
+          <span data-lucide="plus-circle" class="hiw-icon"></span>
+        </div>
+        <h3 class="hiw-card-title">Share a Resource</h3>
+        <p class="hiw-card-desc">Know something the community should know about? Submit a resource and our team will review it.</p>
+        <a href="#submit" class="hiw-cta" onclick="document.getElementById('submit').scrollIntoView({behavior:'smooth'});return false;">Submit a Resource →</a>
+      </div>
+      <div class="hiw-card" data-aos="fade-up" data-aos-delay="200">
+        <div class="hiw-icon-wrap" aria-hidden="true">
+          <span data-lucide="calendar" class="hiw-icon"></span>
+        </div>
+        <h3 class="hiw-card-title">Community Calendar</h3>
+        <p class="hiw-card-desc">Find events, register, and export to your calendar. Never miss what's happening in Harrisonburg.</p>
+        <a href="#calendar" class="hiw-cta" onclick="document.getElementById('calendar').scrollIntoView({behavior:'smooth'});return false;">View Events →</a>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ───────────────────────────────────────────────────────
+     LOVE, HARRISONBURG — PHOTO MARQUEE
+────────────────────────────────────────────────���────── -->
+<section class="love-hbg-section" id="love-hbg" aria-labelledby="love-hbg-heading">
+  <div class="love-hbg-header">
+    <p class="love-hbg-label" aria-hidden="true">Our Community</p>
+    <h2 id="love-hbg-heading" class="section-title love-hbg-title">Love, Harrisonburg</h2>
+    <p class="love-hbg-sub">A city of trails, mountains, and neighbors who show up for each other.</p>
+  </div>
+  <div class="photo-marquee-wrap" aria-hidden="true">
+    <div class="photo-marquee-track">
+      <img src="https://images.unsplash.com/photo-1506905925346-21bda4d32df4?w=600&q=80" alt="" class="photo-marquee-img" loading="lazy">
+      <img src="https://images.unsplash.com/photo-1464822759023-fed622ff2c3b?w=600&q=80" alt="" class="photo-marquee-img" loading="lazy">
+      <img src="https://images.unsplash.com/photo-1441974231531-c6227db76b6e?w=600&q=80" alt="" class="photo-marquee-img" loading="lazy">
+      <img src="https://images.unsplash.com/photo-1501854140801-50d01698950b?w=600&q=80" alt="" class="photo-marquee-img" loading="lazy">
+      <img src="https://images.unsplash.com/photo-1475924156734-496f6cac6ec1?w=600&q=80" alt="" class="photo-marquee-img" loading="lazy">
+      <img src="https://images.unsplash.com/photo-1540979388789-6cee28a1cdc9?w=600&q=80" alt="" class="photo-marquee-img" loading="lazy">
+      <img src="https://images.unsplash.com/photo-1510797215324-95aa89f43c33?w=600&q=80" alt="" class="photo-marquee-img" loading="lazy">
+      <img src="https://images.unsplash.com/photo-1470770841072-f978cf4d019e?w=600&q=80" alt="" class="photo-marquee-img" loading="lazy">
+      <!-- Duplicate for seamless loop -->
+      <img src="https://images.unsplash.com/photo-1506905925346-21bda4d32df4?w=600&q=80" alt="" class="photo-marquee-img" loading="lazy">
+      <img src="https://images.unsplash.com/photo-1464822759023-fed622ff2c3b?w=600&q=80" alt="" class="photo-marquee-img" loading="lazy">
+      <img src="https://images.unsplash.com/photo-1441974231531-c6227db76b6e?w=600&q=80" alt="" class="photo-marquee-img" loading="lazy">
+      <img src="https://images.unsplash.com/photo-1501854140801-50d01698950b?w=600&q=80" alt="" class="photo-marquee-img" loading="lazy">
+      <img src="https://images.unsplash.com/photo-1475924156734-496f6cac6ec1?w=600&q=80" alt="" class="photo-marquee-img" loading="lazy">
+      <img src="https://images.unsplash.com/photo-1540979388789-6cee28a1cdc9?w=600&q=80" alt="" class="photo-marquee-img" loading="lazy">
+      <img src="https://images.unsplash.com/photo-1510797215324-95aa89f43c33?w=600&q=80" alt="" class="photo-marquee-img" loading="lazy">
+      <img src="https://images.unsplash.com/photo-1470770841072-f978cf4d019e?w=600&q=80" alt="" class="photo-marquee-img" loading="lazy">
+    </div>
+  </div>
+</section>
+
+<!-- ───────────────────────────────────────────────────────
+     AWARDS TICKER
+─────────────────────────────────────────────────────── -->
+<div class="awards-ticker-strip" role="marquee" aria-label="Harrisonburg awards and recognition">
+  <div class="awards-track">
+    <span class="award-item"><span class="award-source">Livability.com</span><span class="award-title">Top 100 Best Places to Live</span><span class="award-year-badge">2024</span><span class="award-sep" aria-hidden="true">•</span></span>
+    <span class="award-item"><span class="award-source">Niche.com</span><span class="award-title">#2 Best College City in Virginia</span><span class="award-year-badge">2024</span><span class="award-sep" aria-hidden="true">•</span></span>
+    <span class="award-item"><span class="award-source">SafeWise</span><span class="award-title">Safest Cities in Virginia</span><span class="award-year-badge">2023</span><span class="award-sep" aria-hidden="true">•</span></span>
+    <span class="award-item"><span class="award-source">Outdoor Magazine</span><span class="award-title">Best Adventure Towns</span><span class="award-year-badge">2023</span><span class="award-sep" aria-hidden="true">•</span></span>
+    <span class="award-item"><span class="award-source">WalletHub</span><span class="award-title">Best Small Cities for Families</span><span class="award-year-badge">2023</span><span class="award-sep" aria-hidden="true">•</span></span>
+    <!-- Duplicate for seamless loop -->
+    <span class="award-item"><span class="award-source">Livability.com</span><span class="award-title">Top 100 Best Places to Live</span><span class="award-year-badge">2024</span><span class="award-sep" aria-hidden="true">•</span></span>
+    <span class="award-item"><span class="award-source">Niche.com</span><span class="award-title">#2 Best College City in Virginia</span><span class="award-year-badge">2024</span><span class="award-sep" aria-hidden="true">•</span></span>
+    <span class="award-item"><span class="award-source">SafeWise</span><span class="award-title">Safest Cities in Virginia</span><span class="award-year-badge">2023</span><span class="award-sep" aria-hidden="true">•</span></span>
+    <span class="award-item"><span class="award-source">Outdoor Magazine</span><span class="award-title">Best Adventure Towns</span><span class="award-year-badge">2023</span><span class="award-sep" aria-hidden="true">•</span></span>
+    <span class="award-item"><span class="award-source">WalletHub</span><span class="award-title">Best Small Cities for Families</span><span class="award-year-badge">2023</span><span class="award-sep" aria-hidden="true">•</span></span>
+  </div>
+</div>
+
+<!-- ───────────────────────────────────────────────────────
+     CITY STATS / ABOUT HARRISONBURG
+─────────────────────────────────────────────────────── -->
+<section class="section-wrapper city-stats-bg" id="city-stats" aria-labelledby="city-stats-heading">
+  <div class="section-inner">
+    <div class="section-header" data-aos="fade-up">
+      <div class="section-tag">
+        <span data-lucide="map-pin" class="w-4 h-4"></span> About
+      </div>
+      <h2 id="city-stats-heading" class="section-title" data-i18n="stats.title">About Harrisonburg</h2>
+      <p class="section-subtitle" data-i18n="stats.sub">A vibrant, diverse city in the heart of the Shenandoah Valley</p>
+    </div>
+    <div class="city-stats-grid" id="city-stats-grid" data-aos="fade-up" data-aos-delay="80">
+      <div class="city-stat-tile">
+        <span class="city-stat-number" data-stat-target="56000">0</span>
+        <span class="city-stat-label">Residents</span>
+        <span class="city-stat-sub">One of Virginia's fastest-growing cities</span>
+      </div>
+      <div class="city-stat-tile">
+        <span class="city-stat-number" data-stat-target="1780">0</span>
+        <span class="city-stat-label">Founded</span>
+        <span class="city-stat-sub">Over 240 years of history</span>
+      </div>
+      <div class="city-stat-tile">
+        <span class="city-stat-number" data-stat-static="17.4 mi²" style="opacity:0">17.4 mi²</span>
+        <span class="city-stat-label">Total Area</span>
+        <span class="city-stat-sub">Nestled in the Shenandoah Valley</span>
+      </div>
+      <div class="city-stat-tile">
+        <span class="city-stat-number" data-stat-target="40" data-stat-suffix="+">0</span>
+        <span class="city-stat-label">City Parks</span>
+        <span class="city-stat-sub">Parks, trails, and recreation areas</span>
+      </div>
+      <div class="city-stat-tile">
+        <span class="city-stat-number" data-stat-static="#1" style="opacity:0">#1</span>
+        <span class="city-stat-label">Best College City in VA</span>
+        <span class="city-stat-sub">Niche.com, 2023</span>
+      </div>
+      <div class="city-stat-tile">
+        <span class="city-stat-number" data-stat-static="$52k+" style="opacity:0">$52k+</span>
+        <span class="city-stat-label">Median Household Income</span>
+        <span class="city-stat-sub">Growing local economy</span>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ─────────────────────────────────────────────────────────
+     DAILY DASHBOARD
+─────────────────────────────────────────────────────── -->
+<section class="section-wrapper" id="dashboard" aria-labelledby="dashboard-heading">
+  <div class="section-inner">
+    <div class="section-header" data-aos="fade-up">
+      <div class="section-tag">
+        <span data-lucide="sun" class="w-4 h-4"></span> Daily Digest
+      </div>
+      <h2 id="dashboard-heading" class="section-title">Today in the Community</h2>
+      <p class="section-subtitle">What's happening right now in Harrisonburg</p>
+    </div>
+
+    <div class="dashboard-grid">
+      <!-- Today's Events -->
+      <div class="dash-card" data-aos="fade-up" data-aos-delay="100">
+        <div class="dash-card-header">
+          <div class="dash-icon dash-icon-teal">
+            <span data-lucide="calendar" class="w-5 h-5"></span>
+          </div>
+          <div>
+            <h3 class="dash-title">Today's Events</h3>
+            <p class="dash-sub">Happening nearby</p>
+          </div>
+        </div>
+        <div id="today-events-list" class="dash-list"></div>
+        <a href="#calendar" class="dash-link">View all events <span data-lucide="arrow-right" class="w-4 h-4"></span></a>
+      </div>
+
+      <!-- Announcements -->
+      <div class="dash-card" data-aos="fade-up" data-aos-delay="200">
+        <div class="dash-card-header">
+          <div class="dash-icon dash-icon-purple">
+            <span data-lucide="bell" class="w-5 h-5"></span>
+          </div>
+          <div>
+            <h3 class="dash-title">Announcements</h3>
+            <p class="dash-sub">Important updates</p>
+          </div>
+        </div>
+        <div id="announcements-list" class="dash-list"></div>
+      </div>
+
+      <!-- Trending Resources -->
+      <div class="dash-card" data-aos="fade-up" data-aos-delay="300">
+        <div class="dash-card-header">
+          <div class="dash-icon dash-icon-orange">
+            <span data-lucide="trending-up" class="w-5 h-5"></span>
+          </div>
+          <div>
+            <h3 class="dash-title">Trending Resources</h3>
+            <p class="dash-sub">Most viewed this week</p>
+          </div>
+        </div>
+        <div id="trending-list" class="dash-list"></div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ───────────────────────────────────────────────────────
+     NEWS
+─────────────────────────────────────────────────────── -->
+<section class="section-wrapper news-section-bg" id="news" aria-labelledby="news-heading">
+  <div class="section-inner">
+
+    <div class="section-header" data-aos="fade-up">
+      <div class="section-tag">
+        <span data-lucide="newspaper" class="w-4 h-4"></span> Local News
+      </div>
+      <h2 id="news-heading" class="section-title" data-i18n="news.title">Harrisonburg News</h2>
+      <p class="section-subtitle" data-i18n="news.sub">Stay informed with the latest stories from your community</p>
+    </div>
+
+    <!-- Filter pills + Write a Story -->
+    <div class="news-toolbar" data-aos="fade-up" data-aos-delay="80">
+      <div id="news-filters" class="filter-pills" role="group" aria-label="Filter news by category"></div>
+      <button class="btn-outline-teal" onclick="openStorySubmitModal()" aria-label="Submit your own story">
+        <span data-lucide="edit-3" class="w-4 h-4"></span>
+        + Write a Story
+      </button>
+    </div>
+
+    <!-- Articles rendered by JS -->
+    <div id="news-content" aria-live="polite" aria-label="News articles" role="list"></div>
+
+  </div>
+</section>
+
+<!-- AI Resource Matcher section removed — replaced by floating chatbot FAB below -->
+
+<!-- ───────────────────────────────────────────────────────
+     FEATURED SPOTLIGHT CAROUSEL
+─────────────────────────────────────────────────────── -->
+<section class="section-wrapper bg-slate-50" id="spotlight" aria-labelledby="spotlight-heading">
+  <div class="section-inner">
+    <div class="section-header" data-aos="fade-up">
+      <div class="section-tag">
+        <span data-lucide="star" class="w-4 h-4"></span> Featured
+      </div>
+      <h2 id="spotlight-heading" class="section-title">Resource Spotlight</h2>
+      <p class="section-subtitle">Highlighted organizations making a real difference</p>
+    </div>
+
+    <div class="carousel-container" data-aos="fade-up" data-aos-delay="100">
+      <div id="carousel-track" class="carousel-track" role="list" aria-label="Featured resources carousel"></div>
+      <button onclick="carouselPrev()" class="carousel-btn carousel-btn-prev" aria-label="Previous slide">
+        <span data-lucide="chevron-left" class="w-6 h-6"></span>
+      </button>
+      <button onclick="carouselNext()" class="carousel-btn carousel-btn-next" aria-label="Next slide">
+        <span data-lucide="chevron-right" class="w-6 h-6"></span>
+      </button>
+      <div id="carousel-dots" class="carousel-dots" role="tablist" aria-label="Carousel navigation"></div>
+    </div>
+  </div>
+</section>
+
+<!-- ───────────────────────────────────────────────────────
+     RESOURCE DIRECTORY
+─────────────────────────────────────────────────────── -->
+<section class="section-wrapper" id="directory" aria-labelledby="directory-heading">
+  <div class="section-inner">
+    <div class="section-header" data-aos="fade-up">
+      <div class="section-tag">
+        <span data-lucide="layout-grid" class="w-4 h-4"></span> Directory
+      </div>
+      <h2 id="directory-heading" class="section-title">Resource Directory</h2>
+      <p class="section-subtitle">Search and filter all community resources in Harrisonburg</p>
+    </div>
+
+    <!-- Search + View Toggle -->
+    <div class="dir-toolbar" data-aos="fade-up" data-aos-delay="100">
+      <div class="dir-search-wrap" role="search">
+        <span data-lucide="search" class="dir-search-icon"></span>
+        <input
+          id="dir-search"
+          type="search"
+          placeholder="Search by name, service, or keyword..."
+          aria-label="Search resources"
+          autocomplete="off"
+        />
+      </div>
+      <div class="view-toggle" role="group" aria-label="View toggle">
+        <button id="view-grid-btn" onclick="setView('grid')" class="view-btn active" aria-pressed="true" aria-label="Grid view">
+          <span data-lucide="layout-grid" class="w-4 h-4"></span>
+        </button>
+        <button id="view-list-btn" onclick="setView('list')" class="view-btn" aria-pressed="false" aria-label="List view">
+          <span data-lucide="list" class="w-4 h-4"></span>
+        </button>
+        <button id="view-map-btn" onclick="setView('map')" class="view-btn" aria-pressed="false" aria-label="Map view">
+          <span data-lucide="map" class="w-4 h-4"></span>
+        </button>
+      </div>
+    </div>
+
+    <!-- Filter Bar -->
+    <div class="filter-bar" data-aos="fade-up" data-aos-delay="150" role="group" aria-label="Resource filters">
+      <div class="filter-group">
+        <label class="filter-label" for="filter-category">Category</label>
+        <select id="filter-category" class="filter-select" onchange="applyFilters()" aria-label="Filter by category">
+          <option value="">All Categories</option>
+          <option value="Food">Food</option>
+          <option value="Health">Health</option>
+          <option value="Education">Education</option>
+          <option value="Housing">Housing</option>
+          <option value="Volunteer">Volunteer</option>
+          <option value="Support">Support</option>
+        </select>
+      </div>
+      <div class="filter-group">
+        <label class="filter-label" for="filter-cost">Cost</label>
+        <select id="filter-cost" class="filter-select" onchange="applyFilters()" aria-label="Filter by cost">
+          <option value="">Any Cost</option>
+          <option value="free">Free</option>
+          <option value="paid">Paid / Sliding Scale</option>
+        </select>
+      </div>
+      <div class="filter-group">
+        <label class="filter-label" for="filter-age">Age Group</label>
+        <select id="filter-age" class="filter-select" onchange="applyFilters()" aria-label="Filter by age group">
+          <option value="">All Ages</option>
+          <option value="youth">Youth</option>
+          <option value="adults">Adults</option>
+          <option value="seniors">Seniors</option>
+          <option value="all">All Ages</option>
+        </select>
+      </div>
+      <div class="filter-group">
+        <label class="filter-label" for="filter-availability">Availability</label>
+        <select id="filter-availability" class="filter-select" onchange="applyFilters()" aria-label="Filter by availability">
+          <option value="">Any Time</option>
+          <option value="always">Always Open</option>
+          <option value="weekdays">Weekdays</option>
+          <option value="weekends">Weekends</option>
+        </select>
+      </div>
+      <div class="filter-group">
+        <label class="filter-label" for="filter-sort">Sort By</label>
+        <select id="filter-sort" class="filter-select" onchange="applyFilters()" aria-label="Sort resources">
+          <option value="rating">Highest Rated</option>
+          <option value="reviews">Most Reviewed</option>
+          <option value="name">A–Z</option>
+        </select>
+      </div>
+      <button onclick="clearFilters()" class="filter-clear-btn" aria-label="Clear all filters">
+        <span data-lucide="x" class="w-4 h-4"></span> Clear
+      </button>
+    </div>
+
+    <!-- Active Filter Chips -->
+    <div id="active-filters" class="active-filters hidden" aria-live="polite" aria-label="Active filters"></div>
+
+    <!-- Result Count -->
+    <div class="dir-meta" data-aos="fade-up" data-aos-delay="200">
+      <span id="result-count" class="result-count" aria-live="polite" aria-atomic="true">15 resources found</span>
+    </div>
+
+    <!-- Resource Grid / List -->
+    <div id="resource-container">
+      <div id="resource-grid" class="resource-grid" role="list" aria-label="Resource results"></div>
+      <div id="resource-list" class="resource-list hidden" role="list" aria-label="Resource results list"></div>
+      <div id="map-container" class="map-container hidden" aria-label="Resource map">
+        <div id="resource-map" style="height:520px;border-radius:16px;"></div>
+      </div>
+    </div>
+
+    <!-- No Results -->
+    <div id="no-results" class="no-results hidden" role="status">
+      <span data-lucide="search-x" class="w-12 h-12 mx-auto mb-4 opacity-30"></span>
+      <p class="font-semibold text-lg text-navy-700">No resources match your search</p>
+      <p class="text-slate-500 mt-1">Try different keywords or clear your filters</p>
+      <button onclick="clearFilters()" class="mt-4 btn-secondary">Clear Filters</button>
+    </div>
+  </div>
+</section>
+
+<!-- ───────────────────────────────────────────────────────
+     COMMUNITY CALENDAR
+─────────────────────────────────────────────────────── -->
+<section class="section-wrapper bg-white" id="calendar" aria-labelledby="calendar-heading">
+  <div class="section-inner">
+    <div class="section-header" data-aos="fade-up">
+      <div class="section-tag">
+        <span data-lucide="calendar-days" class="w-4 h-4"></span> Events
+      </div>
+      <h2 id="calendar-heading" class="section-title">Community Calendar</h2>
+      <p class="section-subtitle">Upcoming events, workshops, and volunteer opportunities</p>
+    </div>
+
+    <!-- Calendar Filters -->
+    <div class="cal-filters" data-aos="fade-up" data-aos-delay="100" role="group" aria-label="Event filters">
+      <button onclick="filterEvents('all')" class="cal-filter-btn active" data-type="all">All Events</button>
+      <button onclick="filterEvents('Community Event')" class="cal-filter-btn" data-type="Community Event">Community</button>
+      <button onclick="filterEvents('Workshop')" class="cal-filter-btn" data-type="Workshop">Workshops</button>
+      <button onclick="filterEvents('Volunteer')" class="cal-filter-btn" data-type="Volunteer">Volunteer</button>
+    </div>
+
+    <!-- Calendar View Toggle -->
+    <div class="cal-view-toggle" data-aos="fade-up" data-aos-delay="150">
+      <button onclick="setCalView('list')" id="cal-list-btn" class="view-btn active" aria-pressed="true">
+        <span data-lucide="list" class="w-4 h-4"></span> List
+      </button>
+      <button onclick="setCalView('grid')" id="cal-grid-btn" class="view-btn" aria-pressed="false">
+        <span data-lucide="layout-grid" class="w-4 h-4"></span> Grid
+      </button>
+      <button onclick="setCalView('calendar')" id="cal-cal-btn" class="view-btn" aria-pressed="false">
+        <span data-lucide="calendar-days" class="w-4 h-4"></span> Calendar
+      </button>
+    </div>
+
+    <div id="events-container" class="events-list" role="list" data-aos="fade-up" data-aos-delay="200" aria-label="Events"></div>
+    <!-- Calendar month view (shown when cal view is active) -->
+    <div id="cal-month-view" class="cal-month-view hidden" aria-label="Monthly calendar view">
+      <div class="cal-month-header">
+        <button class="cal-nav-btn" onclick="calMonthPrev()" aria-label="Previous month"><span data-lucide="chevron-left" class="w-5 h-5"></span></button>
+        <div id="cal-month-title" class="cal-month-title" aria-live="polite">April 2026</div>
+        <button class="cal-nav-btn" onclick="calMonthNext()" aria-label="Next month"><span data-lucide="chevron-right" class="w-5 h-5"></span></button>
+      </div>
+      <div class="cal-weekday-row" aria-hidden="true">
+        <div>Sun</div><div>Mon</div><div>Tue</div><div>Wed</div><div>Thu</div><div>Fri</div><div>Sat</div>
+      </div>
+      <div id="cal-days-grid" class="cal-days-grid" role="grid" aria-label="Calendar days"></div>
+      <div id="cal-day-events" class="cal-day-events hidden" aria-live="polite"></div>
+    </div>
+  </div>
+</section>
+
+<!-- ───────────────────────────────────────────────────────
+     DONATE / FUNDRAISERS
+─────────────────────────────────────────────────────── -->
+<section class="section-wrapper donate-section-bg" id="donate" aria-labelledby="donate-heading">
+  <div class="section-inner">
+
+    <div class="section-header" data-aos="fade-up">
+      <div class="section-tag donate-tag">
+        <span data-lucide="heart" class="w-4 h-4"></span> Community Fundraisers
+      </div>
+      <h2 id="donate-heading" class="section-title" data-i18n="donate.title">Support a Cause</h2>
+      <p class="section-subtitle" data-i18n="donate.sub">Every dollar stays local. Back the projects shaping Harrisonburg's future.</p>
+    </div>
+
+    <!-- Animated stats bar -->
+    <div id="donate-stats-bar" class="donate-stats-bar" data-aos="fade-up" data-aos-delay="80"
+      role="region" aria-label="Fundraising statistics"></div>
+
+    <!-- Filter pills + Start a Fundraiser -->
+    <div class="news-toolbar" data-aos="fade-up" data-aos-delay="120">
+      <div id="donate-filters" class="filter-pills" role="group" aria-label="Filter fundraisers by category"></div>
+      <button class="btn-outline-teal" onclick="openCreateFundraiserModal()" aria-label="Start your own fundraiser">
+        <span data-lucide="plus-circle" class="w-4 h-4"></span>
+        Start a Fundraiser
+      </button>
+    </div>
+
+    <!-- Fundraiser cards rendered by JS -->
+    <div id="fundraiser-grid" class="fundraiser-grid" role="list" aria-label="Active fundraisers"></div>
+
+  </div>
+</section>
+
+<!-- ───────────────────────────────────────────────────────
+     COMMUNITY STORIES — 3D COVERFLOW CAROUSEL
+─────────────────────────────────────────────────────── -->
+<section class="section-wrapper stories-section-bg" id="stories" aria-labelledby="stories-heading">
+  <div class="section-inner">
+    <div class="section-header" data-aos="fade-up">
+      <div class="section-tag">
+        <span data-lucide="book-open" class="w-4 h-4"></span> Stories
+      </div>
+      <h2 id="stories-heading" class="section-title">Community Stories</h2>
+      <p class="section-subtitle">Real impact. Real people. Real change.</p>
+    </div>
+
+    <!-- 3D Coverflow Carousel -->
+    <div class="stories-cf-wrap" data-aos="fade-up" data-aos-delay="100">
+      <div class="stories-cf-scene" aria-label="Community stories carousel" role="region">
+        <div class="stories-cf-track" id="stories-cf-track"></div>
+      </div>
+
+      <!-- Nav Buttons -->
+      <button class="stories-cf-btn stories-cf-prev" onclick="storiesCFPrev()" aria-label="Previous story">
+        <span data-lucide="chevron-left" class="w-7 h-7"></span>
+      </button>
+      <button class="stories-cf-btn stories-cf-next" onclick="storiesCFNext()" aria-label="Next story">
+        <span data-lucide="chevron-right" class="w-7 h-7"></span>
+      </button>
+
+      <!-- Dots -->
+      <div class="stories-cf-dots" id="stories-cf-dots" role="tablist" aria-label="Story navigation"></div>
+    </div>
+  </div>
+</section>
+
+<!-- ───────────────────────────────────────────────────────
+     RESOURCE SUBMISSION FORM
+─────────────────────────────────────────────────────── -->
+<section class="section-wrapper bg-white" id="submit" aria-labelledby="submit-heading">
+  <div class="section-inner max-w-3xl mx-auto">
+    <div class="section-header" data-aos="fade-up">
+      <div class="section-tag">
+        <span data-lucide="plus-circle" class="w-4 h-4"></span> Submit
+      </div>
+      <h2 id="submit-heading" class="section-title">Submit a Resource</h2>
+      <p class="section-subtitle">Know of a resource that should be listed? Share it with the community.</p>
+    </div>
+
+    <div class="form-card" data-aos="fade-up" data-aos-delay="100">
+      <form id="resource-form" novalidate aria-label="Resource submission form">
+        <div class="form-grid">
+          <div class="form-group">
+            <label class="form-label" for="f-name">Resource Name <span class="required">*</span></label>
+            <input id="f-name" type="text" class="form-input" placeholder="e.g. Valley Food Pantry" required aria-required="true" />
+          </div>
+          <div class="form-group">
+            <label class="form-label" for="f-category">Category <span class="required">*</span></label>
+            <select id="f-category" class="form-input" required aria-required="true">
+              <option value="">Select a category</option>
+              <option>Food</option>
+              <option>Health</option>
+              <option>Education</option>
+              <option>Housing</option>
+              <option>Volunteer</option>
+              <option>Support</option>
+            </select>
+          </div>
+          <div class="form-group">
+            <label class="form-label" for="f-phone">Phone</label>
+            <input id="f-phone" type="tel" class="form-input" placeholder="(540) 555-0000" />
+          </div>
+          <div class="form-group">
+            <label class="form-label" for="f-email">Email</label>
+            <input id="f-email" type="email" class="form-input" placeholder="contact@org.org" />
+          </div>
+          <div class="form-group col-span-2">
+            <label class="form-label" for="f-address">Address <span class="required">*</span></label>
+            <input id="f-address" type="text" class="form-input" placeholder="123 Main St, Harrisonburg, VA" required aria-required="true" />
+          </div>
+          <div class="form-group col-span-2">
+            <label class="form-label" for="f-website">Website</label>
+            <input id="f-website" type="url" class="form-input" placeholder="https://yourorganization.org" />
+          </div>
+          <div class="form-group col-span-2">
+            <label class="form-label" for="f-desc">Description <span class="required">*</span></label>
+            <textarea id="f-desc" class="form-textarea" rows="4" placeholder="Describe what this resource offers and who it serves..." required aria-required="true"></textarea>
+          </div>
+          <div class="form-group col-span-2">
+            <label class="form-label" for="f-tags">Tags</label>
+            <div class="tag-checkboxes" id="tag-checkboxes" role="group" aria-label="Resource tags">
+              <label class="tag-check"><input type="checkbox" value="Free"> Free</label>
+              <label class="tag-check"><input type="checkbox" value="Family Friendly"> Family Friendly</label>
+              <label class="tag-check"><input type="checkbox" value="Youth"> Youth</label>
+              <label class="tag-check"><input type="checkbox" value="Seniors"> Seniors</label>
+              <label class="tag-check"><input type="checkbox" value="Emergency Support"> Emergency Support</label>
+              <label class="tag-check"><input type="checkbox" value="Volunteer Opportunity"> Volunteer Opportunity</label>
+            </div>
+          </div>
+          <div class="form-group col-span-2">
+            <label class="form-label" for="f-file">Upload Flyer / Brochure</label>
+            <div class="file-upload-area" id="file-drop" onclick="document.getElementById('f-file').click()" role="button" tabindex="0" aria-label="Upload file">
+              <span data-lucide="upload-cloud" class="w-8 h-8 text-slate-400 mb-2"></span>
+              <p class="text-sm text-slate-500">Drag & drop or click to upload</p>
+              <p class="text-xs text-slate-400 mt-1">PDF, JPG, PNG up to 5MB</p>
+              <input id="f-file" type="file" accept=".pdf,.jpg,.png" class="hidden" onchange="handleFileUpload(event)" aria-label="Choose file" />
+            </div>
+            <div id="file-preview" class="file-preview hidden"></div>
+          </div>
+        </div>
+
+        <div id="form-error" class="form-error hidden" role="alert" aria-live="polite"></div>
+
+        <button type="submit" class="form-submit-btn" aria-label="Submit resource for review">
+          <span data-lucide="send" class="w-5 h-5"></span>
+          Submit for Review
+        </button>
+      </form>
+
+      <!-- Success Message -->
+      <div id="submit-success" class="submit-success hidden" role="status" aria-live="polite">
+        <div class="success-icon">
+          <span data-lucide="check-circle" class="w-10 h-10"></span>
+        </div>
+        <h3 class="text-xl font-bold text-navy mt-4">Thank You!</h3>
+        <p class="text-slate-500 mt-2">Your resource has been submitted for admin review. It will appear in the directory once approved.</p>
+        <button onclick="resetForm()" class="mt-6 btn-secondary">Submit Another</button>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ───────────────────────────────────────────────────────
+     ADMIN MODERATION QUEUE (admin only)
+─────────────────────────────────────────────────────── -->
+<section class="section-wrapper bg-slate-50 admin-only-section" id="admin" aria-labelledby="admin-heading" style="display:none">
+  <div class="section-inner">
+    <div class="section-header" data-aos="fade-up">
+      <div class="section-tag">
+        <span data-lucide="shield-check" class="w-4 h-4"></span> Admin
+      </div>
+      <h2 id="admin-heading" class="section-title">Moderation Queue</h2>
+      <p class="section-subtitle">Submitted resources awaiting review</p>
+    </div>
+    <div id="admin-queue" class="admin-queue" data-aos="fade-up" data-aos-delay="100" aria-label="Admin queue" aria-live="polite">
+      <div class="empty-queue" role="status">
+        <span data-lucide="inbox" class="w-10 h-10 mx-auto mb-3 text-slate-300"></span>
+        <p class="text-slate-400">No submissions pending review</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ───────────────────────────────────────────────────────
+     COMMUNITY ANALYTICS
+─────────────────────────────────────────────────────── -->
+<section class="section-wrapper bg-white" id="analytics" aria-labelledby="analytics-heading">
+  <div class="section-inner">
+    <div class="section-header" data-aos="fade-up">
+      <div class="section-tag">
+        <span data-lucide="bar-chart-2" class="w-4 h-4"></span> Analytics
+      </div>
+      <h2 id="analytics-heading" class="section-title">Community Data Intelligence</h2>
+      <p class="section-subtitle">Real-time insights and advanced 3D visualizations of Harrisonburg's resource ecosystem</p>
+    </div>
+
+    <!-- KPI Row -->
+    <div class="analytics-kpi-row" data-aos="fade-up" data-aos-delay="50">
+      <div class="kpi-card">
+        <div class="kpi-icon" style="background:rgba(20,184,166,.1);color:var(--teal)"><span data-lucide="layers" class="w-5 h-5"></span></div>
+        <div><div class="kpi-value" id="kpi-total">15</div><div class="kpi-label">Total Resources</div></div>
+      </div>
+      <div class="kpi-card">
+        <div class="kpi-icon" style="background:rgba(139,92,246,.1);color:var(--purple)"><span data-lucide="star" class="w-5 h-5"></span></div>
+        <div><div class="kpi-value" id="kpi-avg-rating">4.6</div><div class="kpi-label">Avg. Rating</div></div>
+      </div>
+      <div class="kpi-card">
+        <div class="kpi-icon" style="background:rgba(249,115,22,.1);color:#F97316"><span data-lucide="message-square" class="w-5 h-5"></span></div>
+        <div><div class="kpi-value" id="kpi-reviews">1,518</div><div class="kpi-label">Total Reviews</div></div>
+      </div>
+      <div class="kpi-card">
+        <div class="kpi-icon" style="background:rgba(16,185,129,.1);color:#10B981"><span data-lucide="gift" class="w-5 h-5"></span></div>
+        <div><div class="kpi-value" id="kpi-free">12</div><div class="kpi-label">Free Resources</div></div>
+      </div>
+    </div>
+
+    <!-- 3D World Launch Banner -->
+    <div class="ar-launch-card world3d-launch-card" data-aos="fade-up" data-aos-delay="80">
+      <div class="ar-launch-content">
+        <div class="ar-launch-icon" style="background:linear-gradient(135deg,#8B5CF6,#7C3AED);box-shadow:0 8px 24px rgba(139,92,246,.35)">
+          <span data-lucide="globe" class="w-8 h-8"></span>
+        </div>
+        <div>
+          <h3 class="ar-launch-title">3D Virtual Community World</h3>
+          <p class="ar-launch-desc">Enter an immersive Three.js 3D environment where all 15 community resources float as glowing holographic cards in a virtual Harrisonburg. Orbit, zoom, and click to explore every resource in a futuristic digital world.</p>
+        </div>
+      </div>
+      <button onclick="startWorld3D()" class="btn-ar-launch" style="background:linear-gradient(135deg,#8B5CF6,#7C3AED);box-shadow:0 4px 16px rgba(139,92,246,.35)" aria-label="Launch 3D Virtual World">
+        <span data-lucide="box" class="w-5 h-5"></span>
+        Enter 3D World
+      </button>
+    </div>
+
+    <!-- Advanced Chart Grid -->
+    <div class="analytics-grid-advanced" data-aos="fade-up" data-aos-delay="100">
+      <!-- 1. Epic 3D Bar — Resource Command Center -->
+      <div class="chart-card chart-card-large" data-aos="fade-up" data-aos-delay="120">
+        <div class="chart-header">
+          <div>
+            <h3 class="chart-title">Resource Command Center</h3>
+            <p class="chart-subtitle">Auto-rotating 3D distribution with bloom rendering</p>
+          </div>
+          <span class="chart-badge chart-badge-3d">3D·GL</span>
+        </div>
+        <div id="chart-3d-bar" style="height:380px;" aria-label="3D resource distribution chart" role="img"></div>
+        <p class="chart-desc">Visualizes how Harrisonburg's community resources are distributed across six service categories. Food and Health show the highest concentration, reflecting the city's prioritization of basic needs and wellness support for residents.</p>
+      </div>
+      <!-- 2. Force Network Graph — Resource Galaxy -->
+      <div class="chart-card chart-card-large" data-aos="fade-up" data-aos-delay="140">
+        <div class="chart-header">
+          <div>
+            <h3 class="chart-title">Resource Galaxy</h3>
+            <p class="chart-subtitle">Live force-directed network — drag nodes to explore</p>
+          </div>
+          <span class="chart-badge chart-badge-network">Network</span>
+        </div>
+        <div id="chart-3d-scatter" style="height:380px;" aria-label="Resource network graph" role="img"></div>
+        <p class="chart-desc">Maps the relationships between resource categories and individual organizations as an interactive network. Larger hub nodes represent categories with more resources, and the connecting lines show which organizations belong to each service area.</p>
+      </div>
+      <!-- 3. Dual Radar — Community Coverage -->
+      <div class="chart-card" data-aos="fade-up" data-aos-delay="160">
+        <div class="chart-header">
+          <div>
+            <h3 class="chart-title">Community Coverage</h3>
+            <p class="chart-subtitle">Resources vs average quality by category</p>
+          </div>
+          <span class="chart-badge">Radar</span>
+        </div>
+        <div id="chart-radar" style="height:300px;" aria-label="Category radar chart" role="img"></div>
+        <p class="chart-desc">Compares two dimensions for each category: the total number of available resources versus their average community quality rating. Categories where count is high but quality lags may indicate a need for better funding or oversight.</p>
+      </div>
+      <!-- 4. Animated Sankey Flow -->
+      <div class="chart-card" data-aos="fade-up" data-aos-delay="180">
+        <div class="chart-header">
+          <div>
+            <h3 class="chart-title">Community Flow</h3>
+            <p class="chart-subtitle">Resource engagement flowing from categories</p>
+          </div>
+          <span class="chart-badge chart-badge-flow">Sankey</span>
+        </div>
+        <div id="chart-sunburst" style="height:300px;" aria-label="Community flow sankey chart" role="img"></div>
+        <p class="chart-desc">Traces how community engagement flows from broad resource categories into specific organizations, with each flow sized by the number of community reviews. Thicker flows indicate organizations generating the most community interaction.</p>
+      </div>
+      <!-- 5. Live Streaming Metrics -->
+      <div class="chart-card" data-aos="fade-up" data-aos-delay="200">
+        <div class="chart-header">
+          <div>
+            <h3 class="chart-title">Live Metrics</h3>
+            <p class="chart-subtitle">Real-time simulated community activity stream</p>
+          </div>
+          <span class="chart-badge chart-badge-live"><span class="live-dot"></span>LIVE</span>
+        </div>
+        <div id="chart-gauge" style="height:300px;" aria-label="Live metrics chart" role="img"></div>
+        <p class="chart-desc">Simulates real-time community activity across three key indicators: resource page engagement, event registration activity, and overall resource access rates. In a production deployment, this would connect to live analytics data.</p>
+      </div>
+    </div>
+
+    <!-- 3D Community Orbit — full-width premium Three.js visualization -->
+    <div class="chart-card chart-card-orbit" data-aos="fade-up" data-aos-delay="220">
+      <div class="chart-header">
+        <div>
+          <h3 class="chart-title">Community Orbit</h3>
+          <p class="chart-subtitle">Live 3D visualization — 6 category orbits, 15 resource nodes, continuously animated</p>
+        </div>
+        <span class="chart-badge chart-badge-3d" style="background:linear-gradient(135deg,#14B8A6,#8B5CF6);color:white">3D·Live</span>
+      </div>
+      <div id="community-orbit-3d" style="height:480px;border-radius:16px;overflow:hidden;position:relative;" aria-label="3D community orbit visualization" role="img"></div>
+      <div class="orbit-legend" id="orbit-legend"></div>
+    </div>
+  </div>
+</section>
+
+<!-- ───────────────────────────────────────────────────────
+     COMPARE RESOURCES
+─────────────────────────────────────────────────────── -->
+<section class="section-wrapper bg-slate-50" id="compare" aria-labelledby="compare-heading">
+  <div class="section-inner max-w-4xl mx-auto">
+    <div class="section-header" data-aos="fade-up">
+      <div class="section-tag">
+        <span data-lucide="git-compare" class="w-4 h-4"></span> Compare
+      </div>
+      <h2 id="compare-heading" class="section-title">Compare Resources</h2>
+      <p class="section-subtitle">Side-by-side comparison to find the best fit</p>
+    </div>
+    <div class="compare-selectors" data-aos="fade-up" data-aos-delay="100">
+      <select id="compare-a" class="form-input" onchange="renderComparison()" aria-label="First resource to compare">
+        <option value="">Select resource A</option>
+      </select>
+      <div class="compare-vs" aria-hidden="true">VS</div>
+      <select id="compare-b" class="form-input" onchange="renderComparison()" aria-label="Second resource to compare">
+        <option value="">Select resource B</option>
+      </select>
+    </div>
+    <div id="comparison-result" class="comparison-result" aria-live="polite"></div>
+  </div>
+</section>
+
+<!-- ───────────────────────────────────────────────────────
+     FAVORITES SECTION
+─────────────────────────────────────────────────────── -->
+<section class="section-wrapper bg-gradient-to-b from-white to-slate-50" id="favorites" aria-labelledby="favorites-heading">
+  <div class="section-inner">
+    <div class="section-header" data-aos="fade-up">
+      <div class="section-tag">
+        <span data-lucide="heart" class="w-4 h-4"></span> Saved
+      </div>
+      <h2 id="favorites-heading" class="section-title">Your Favorites</h2>
+      <p class="section-subtitle">Resources and events you've saved for quick access</p>
+    </div>
+    <div id="favorites-empty" class="favorites-empty" role="status">
+      <div class="favorites-empty-icon">
+        <span data-lucide="heart" class="w-12 h-12"></span>
+      </div>
+      <p class="font-semibold text-lg" style="color:var(--navy-700)">No favorites yet</p>
+      <p style="color:var(--navy-600);margin-top:6px;font-size:14px">Click the heart icon on any resource or event card to save it here</p>
+    </div>
+    <div id="favorites-grid" class="favorites-grid hidden" role="list" aria-label="Favorited resources and events"></div>
+  </div>
+</section>
+
+<!-- ───────────────────────────────────────────────────────
+     NEWSLETTER SIGNUP
+─────────────────────────────────────────────────────── -->
+<div class="newsletter-strip" id="newsletter" role="complementary" aria-label="Newsletter signup">
+  <div class="newsletter-inner">
+    <h2 class="newsletter-heading" data-i18n="newsletter.title">Never Miss a Community Moment</h2>
+    <p class="newsletter-sub" data-i18n="newsletter.sub">Get weekly updates on new events, volunteer opportunities, and community initiatives.</p>
+    <div class="newsletter-form-row">
+      <input
+        id="newsletter-email"
+        type="email"
+        placeholder="Enter your email"
+        aria-label="Email address"
+        class="newsletter-input"
+        onkeydown="if(event.key==='Enter')submitNewsletter()"
+      />
+      <button onclick="submitNewsletter()" class="newsletter-btn" aria-label="Subscribe to newsletter">Join</button>
+    </div>
+    <p class="newsletter-fine-print">No spam, just community goodness. Unsubscribe anytime.</p>
+  </div>
+</div>
+
+<!-- ───────────────────────────────────────────────────────
+     FOOTER
+─────────────────────────────────────────────────────── -->
+<footer class="footer" role="contentinfo">
+  <div class="footer-inner">
+    <div class="footer-brand">
+      <div class="logo-icon-sm">
+        <span data-lucide="map-pin" class="w-4 h-4"></span>
+      </div>
+      <span class="logo-text-sm">Connect<span class="text-teal">HBG</span></span>
+      <p class="footer-tagline">Connecting Harrisonburg to the resources that matter most.</p>
+    </div>
+    <div class="footer-links">
+      <div class="footer-col">
+        <h4>Explore</h4>
+        <a href="#directory">Resource Directory</a>
+        <a href="#calendar">Community Calendar</a>
+        <a href="#stories">Community Stories</a>
+        <a href="government.html">City Government</a>
+        <a href="crisis.html">Crisis Resources</a>
+        <a href="references.html">References</a>
+      </div>
+      <div class="footer-col">
+        <h4>Get Involved</h4>
+        <a href="#submit">Submit a Resource</a>
+        <a href="#calendar">Volunteer</a>
+      </div>
+      <div class="footer-col">
+        <h4>Accessibility</h4>
+        <button onclick="increaseFontSize()">Larger Text</button>
+        <button onclick="decreaseFontSize()">Smaller Text</button>
+        <button onclick="toggleTTS()">Text to Speech</button>
+        <button onclick="toggleDark()">Toggle Dark Mode</button>
+      </div>
+      <div class="footer-col">
+        <h4 class="footer-contact-heading">Contact</h4>
+        <div class="footer-contact-row">
+          <span data-lucide="mail" class="footer-contact-icon"></span>
+          <a href="mailto:info@connecthbg.org" class="footer-contact-link">info@connecthbg.org</a>
+        </div>
+        <div class="footer-contact-row">
+          <span data-lucide="phone" class="footer-contact-icon"></span>
+          <a href="tel:+15404344436" class="footer-contact-link">(540) 434-4436</a>
+        </div>
+        <div class="footer-contact-row">
+          <span data-lucide="map-pin" class="footer-contact-icon"></span>
+          <span class="footer-contact-text">409 S Main St, Harrisonburg, VA 22801</span>
+        </div>
+        <div class="footer-contact-row">
+          <span data-lucide="clock" class="footer-contact-icon"></span>
+          <span class="footer-contact-text">Mon – Fri, 8 AM – 5 PM</span>
+        </div>
+      </div>
+    </div>
+  </div>
+  <div class="footer-bottom">
+    <p>© 2026 ConnectHBG. Built for the TSA Webmaster Competition.</p>
+  </div>
+</footer>
+
+</main>
+
+<!-- ═══════════════════════════════════════════════════════
+     MODALS
+═══════════════════════════════════════════════════════ -->
+
+<!-- Story Detail Modal -->
+<div id="story-modal" class="modal-overlay hidden" role="dialog" aria-modal="true" aria-labelledby="story-modal-title" onclick="closeStoryModal(event)">
+  <div class="modal-box" style="max-width:740px">
+    <button onclick="closeStoryModal()" class="modal-close" aria-label="Close story">
+      <span data-lucide="x" class="w-5 h-5"></span>
+    </button>
+    <div id="story-modal-content"></div>
+  </div>
+</div>
+
+<!-- Resource Detail Modal -->
+<div id="resource-modal" class="modal-overlay hidden" role="dialog" aria-modal="true" aria-labelledby="modal-title" onclick="closeModal(event)">
+  <div class="modal-box">
+    <button onclick="closeResourceModal()" class="modal-close" aria-label="Close modal">
+      <span data-lucide="x" class="w-5 h-5"></span>
+    </button>
+    <div id="modal-content"></div>
+  </div>
+</div>
+
+<!-- Login Modal -->
+<div id="login-modal" class="modal-overlay hidden" role="dialog" aria-modal="true" aria-labelledby="login-modal-title" onclick="closeLoginModal(event)">
+  <div class="modal-box" style="max-width:min(95vw,28rem);overflow-y:auto;max-height:90vh">
+    <button onclick="closeLoginModal()" class="modal-close" aria-label="Close login modal">
+      <span data-lucide="x" class="w-5 h-5"></span>
+    </button>
+    <div style="padding:24px 24px 20px">
+      <!-- Modal icon + title -->
+      <div style="text-align:center;margin-bottom:24px">
+        <div class="login-modal-avatar">
+          <span data-lucide="user-circle-2" class="w-10 h-10"></span>
+        </div>
+        <h2 id="login-modal-title" style="font-size:1.5rem;font-weight:800;color:var(--navy);margin:12px 0 4px">Welcome to ConnectHBG</h2>
+        <p style="color:var(--navy-600);font-size:13px">Sign in or create an account to save favorites and leave reviews</p>
+      </div>
+
+      <!-- Tabs -->
+      <div class="login-tabs" role="tablist" aria-label="Sign in or register">
+        <button id="tab-signin" class="login-tab active" onclick="switchLoginTab('signin')" role="tab" aria-selected="true" aria-controls="panel-signin">Sign In</button>
+        <button id="tab-register" class="login-tab" onclick="switchLoginTab('register')" role="tab" aria-selected="false" aria-controls="panel-register">Create Account</button>
+      </div>
+
+      <!-- Sign In Panel -->
+      <div id="panel-signin" role="tabpanel" aria-labelledby="tab-signin">
+        <div id="login-error" class="login-error hidden" role="alert"></div>
+        <div style="margin-bottom:14px">
+          <label style="font-size:12px;font-weight:700;color:var(--navy-600);text-transform:uppercase;letter-spacing:.4px;display:block;margin-bottom:6px">Username</label>
+          <input type="text" id="login-username" class="form-input" placeholder="Enter your username" aria-label="Username" autocomplete="username" />
+        </div>
+        <div style="margin-bottom:20px">
+          <label style="font-size:12px;font-weight:700;color:var(--navy-600);text-transform:uppercase;letter-spacing:.4px;display:block;margin-bottom:6px">Password</label>
+          <div style="position:relative">
+            <input type="password" id="login-password" class="form-input" placeholder="Enter your password" aria-label="Password" autocomplete="current-password" style="padding-right:44px" />
+            <button type="button" onclick="togglePasswordVis('login-password', this)" style="position:absolute;right:12px;top:50%;transform:translateY(-50%);color:var(--navy-600);background:none;border:none;cursor:pointer;display:flex;align-items:center" aria-label="Toggle password visibility">
+              <span data-lucide="eye" class="w-4 h-4"></span>
+            </button>
+          </div>
+        </div>
+        <button onclick="submitLogin()" class="form-submit-btn" style="margin-top:0">
+          <span data-lucide="log-in" class="w-5 h-5"></span>
+          Sign In
+        </button>
+        <div style="margin-top:16px;padding:12px 16px;background:rgba(20,184,166,.06);border-radius:10px;border:1px solid rgba(20,184,166,.12)">
+          <p style="font-size:11px;font-weight:700;color:var(--teal-dark);margin:0 0 6px;text-transform:uppercase;letter-spacing:.4px">Competition Judge Access</p>
+          <p style="font-size:12px;color:var(--navy-600);margin:0">Username: <strong>judge</strong> &nbsp;|&nbsp; Password: <strong>TSA2026!</strong></p>
+        </div>
+      </div>
+
+      <!-- Register Panel -->
+      <div id="panel-register" role="tabpanel" aria-labelledby="tab-register" class="hidden">
+        <div id="register-error" class="login-error hidden" role="alert"></div>
+        <div style="margin-bottom:14px">
+          <div style="margin-bottom:12px">
+            <label style="font-size:12px;font-weight:700;color:var(--navy-600);text-transform:uppercase;letter-spacing:.4px;display:block;margin-bottom:6px">Display Name</label>
+            <input type="text" id="reg-displayname" class="form-input" placeholder="Your name" aria-label="Display name" />
+          </div>
+          <div>
+            <label style="font-size:12px;font-weight:700;color:var(--navy-600);text-transform:uppercase;letter-spacing:.4px;display:block;margin-bottom:6px">Username</label>
+            <input type="text" id="reg-username" class="form-input" placeholder="Choose username" aria-label="Username" autocomplete="username" />
+          </div>
+        </div>
+        <div style="margin-bottom:12px">
+          <label style="font-size:12px;font-weight:700;color:var(--navy-600);text-transform:uppercase;letter-spacing:.4px;display:block;margin-bottom:6px">Password</label>
+          <input type="password" id="reg-password" class="form-input" placeholder="Create a password" aria-label="Password" autocomplete="new-password" />
+        </div>
+        <div style="margin-bottom:20px">
+          <label style="font-size:12px;font-weight:700;color:var(--navy-600);text-transform:uppercase;letter-spacing:.4px;display:block;margin-bottom:6px">Confirm Password</label>
+          <input type="password" id="reg-confirm" class="form-input" placeholder="Confirm password" aria-label="Confirm password" autocomplete="new-password" />
+        </div>
+        <button onclick="submitRegister()" class="form-submit-btn" style="margin-top:0">
+          <span data-lucide="user-plus" class="w-5 h-5"></span>
+          Create Account
+        </button>
+        <p style="font-size:11px;color:var(--navy-600);text-align:center;margin-top:14px">By creating an account you agree to our community guidelines.</p>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- 3D Virtual World Explorer -->
+<div id="world3d-modal" class="world3d-overlay hidden" role="dialog" aria-modal="true" aria-label="3D Community City World">
+  <canvas id="world3d-canvas" class="world3d-canvas"></canvas>
+
+  <!-- Click-to-Play Overlay -->
+  <div id="world3d-click-to-play" class="world3d-click-overlay">
+    <div class="world3d-click-box">
+      <div class="world3d-city-icon">🏙</div>
+      <h2 style="font-size:1.6rem;font-weight:900;color:white;margin:12px 0 8px;letter-spacing:-.5px">3D Community City</h2>
+      <p style="color:rgba(255,255,255,.65);font-size:14px;line-height:1.6;margin-bottom:20px">Walk the streets of Harrisonburg and explore every community resource as a living, breathing city block.</p>
+      <div class="world3d-controls-hint">
+        <div><span>W A S D</span> Move</div>
+        <div><span>Mouse</span> Look Around</div>
+        <div><span>Click / E</span> Enter Building</div>
+        <div><span>ESC</span> Pause</div>
+      </div>
+      <button id="world3d-enter-btn" class="world3d-enter-btn" onclick="world3DControls && world3DControls.lock()">
+        <span data-lucide="play" class="w-5 h-5" style="display:inline-flex;vertical-align:middle;margin-right:6px"></span>
+        Click to Enter City
+      </button>
+    </div>
+  </div>
+
+  <!-- FPS HUD (shown only while pointer locked) -->
+  <div id="world3d-fps-hud" class="world3d-fps-hud" style="display:none">
+    <div class="world3d-crosshair">
+      <div class="crosshair-h"></div>
+      <div class="crosshair-v"></div>
+    </div>
+    <div id="world3d-proximity-prompt" class="world3d-proximity-prompt hidden">
+      Press <kbd>E</kbd> to view — <span id="world3d-proximity-name"></span>
+    </div>
+    <div class="world3d-fps-controls">WASD · Move &nbsp;|&nbsp; Mouse · Look &nbsp;|&nbsp; Click / E · Enter Building &nbsp;|&nbsp; ESC · Pause</div>
+  </div>
+
+  <!-- HUD Header -->
+  <div class="world3d-header">
+    <div style="display:flex;align-items:center;gap:12px">
+      <div class="world3d-logo-dot"></div>
+      <div>
+        <div style="font-size:15px;font-weight:800;color:white;letter-spacing:-.3px">3D Community City</div>
+        <div style="font-size:11px;color:rgba(20,184,166,.8);font-weight:600">Harrisonburg, VA · First-Person Explorer</div>
+      </div>
+    </div>
+    <div style="display:flex;align-items:center;gap:12px">
+      <div class="world3d-hud-pill"><span data-lucide="gamepad-2" class="w-3 h-3"></span> FPS City Explorer</div>
+      <button onclick="closeWorld3D()" class="world3d-close-btn" aria-label="Close 3D World">
+        <span data-lucide="x" class="w-5 h-5"></span>
+      </button>
+    </div>
+  </div>
+
+  <!-- Legend -->
+  <div class="world3d-legend" id="world3d-legend"></div>
+
+  <!-- Selected resource info -->
+  <div class="world3d-info-panel hidden" id="world3d-info" style="pointer-events:auto">
+    <div id="world3d-info-content"></div>
+    <button onclick="openResourceFromWorld3D()" class="world3d-view-btn">View Full Details →</button>
+    <button onclick="document.getElementById('world3d-info').classList.add('hidden')" class="world3d-view-btn" style="background:rgba(255,255,255,.1);margin-top:6px">Continue Exploring</button>
+  </div>
+
+  <!-- Stats HUD -->
+  <div class="world3d-stats">
+    <div class="world3d-stat"><span id="w3d-count">15</span><span>Resources</span></div>
+    <div class="world3d-stat-divider"></div>
+    <div class="world3d-stat"><span>6</span><span>Categories</span></div>
+    <div class="world3d-stat-divider"></div>
+    <div class="world3d-stat"><span>HBG</span><span>Virginia</span></div>
+  </div>
+</div>
+
+<!-- Account Dashboard Panel -->
+<div id="account-dashboard" class="account-panel hidden" role="dialog" aria-modal="true" aria-label="Account Dashboard">
+  <div class="account-panel-overlay" onclick="closeAccountDashboard()"></div>
+  <div class="account-panel-inner" role="document">
+    <div class="account-panel-scroll">
+
+      <!-- Header -->
+      <div class="account-panel-header">
+        <h2 style="font-size:17px;font-weight:800;color:var(--navy)">My Account</h2>
+        <button onclick="closeAccountDashboard()" class="modal-close" style="position:static;float:none;margin:0" aria-label="Close account">
+          <span data-lucide="x" class="w-5 h-5"></span>
+        </button>
+      </div>
+
+      <!-- Profile section -->
+      <div class="account-profile-card">
+        <div id="account-avatar" class="account-avatar">?</div>
+        <div class="account-profile-info">
+          <div id="account-displayname" class="account-name">—</div>
+          <div id="account-username-display" class="account-handle">@—</div>
+          <span id="account-role-badge" class="account-role-badge">Member</span>
+        </div>
+        <button onclick="signOut()" class="account-signout-btn" title="Sign out">
+          <span data-lucide="log-out" class="w-4 h-4"></span>
+        </button>
+      </div>
+
+      <!-- Stats -->
+      <div class="account-stats-row">
+        <div class="account-stat"><span id="acc-events-count" class="account-stat-num">0</span><span class="account-stat-lbl">Registered</span></div>
+        <div class="account-stat"><span id="acc-favs-count" class="account-stat-num">0</span><span class="account-stat-lbl">Favorites</span></div>
+        <div class="account-stat"><span id="acc-reviews-count" class="account-stat-num">0</span><span class="account-stat-lbl">Reviews</span></div>
+        <div class="account-stat"><span id="acc-submissions-count" class="account-stat-num">0</span><span class="account-stat-lbl">Submitted</span></div>
+      </div>
+
+      <!-- Submissions Status (shows pending + approved) -->
+      <div class="account-section" id="acc-submissions-section" style="display:none">
+        <div class="account-section-header">
+          <h3 class="account-section-title"><span data-lucide="send" class="w-4 h-4"></span> My Submissions</h3>
+          <a href="#submit" onclick="closeAccountDashboard()" class="account-section-link">Submit Resource</a>
+        </div>
+        <div id="account-submissions-list" class="account-events-list">
+          <p class="account-empty-msg">No submissions yet</p>
+        </div>
+      </div>
+
+      <!-- Registered Events -->
+      <div class="account-section">
+        <div class="account-section-header">
+          <h3 class="account-section-title"><span data-lucide="calendar-check" class="w-4 h-4"></span> Registered Events</h3>
+        </div>
+        <div id="account-events-list" class="account-events-list">
+          <p class="account-empty-msg">No events registered yet</p>
+        </div>
+      </div>
+
+      <!-- Saved Favorites Preview -->
+      <div class="account-section">
+        <div class="account-section-header">
+          <h3 class="account-section-title"><span data-lucide="heart" class="w-4 h-4"></span> Saved Favorites</h3>
+          <a href="#favorites" onclick="closeAccountDashboard()" class="account-section-link">View all</a>
+        </div>
+        <div id="account-favs-preview" class="account-favs-preview"></div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Issue Report Modal -->
+<div id="issue-modal" class="modal-overlay hidden" role="dialog" aria-modal="true" aria-labelledby="issue-modal-title" onclick="closeIssueModal(event)">
+  <div class="modal-box" style="max-width:540px">
+    <button onclick="closeIssueModalDirect()" class="modal-close" aria-label="Close modal">
+      <span data-lucide="x" class="w-5 h-5"></span>
+    </button>
+    <div class="modal-body">
+      <h2 id="issue-modal-title" style="font-size:1.25rem;font-weight:700;color:var(--navy);margin:0 0 24px" data-i18n="issue.title">Report an Issue</h2>
+      <form id="issue-form" novalidate>
+        <div class="form-group" style="margin-bottom:16px">
+          <label class="form-label" for="issue-type" data-i18n="issue.type.label">Issue Type <span class="required">*</span></label>
+          <select id="issue-type" class="form-input" aria-label="Issue type" aria-required="true" required>
+            <option value="">Select issue type</option>
+            <option>Pothole</option>
+            <option>Broken Streetlight</option>
+            <option>Fallen Tree</option>
+            <option>Graffiti</option>
+            <option>Sidewalk Damage</option>
+            <option>Other</option>
+          </select>
+        </div>
+        <div class="form-group" style="margin-bottom:16px">
+          <label class="form-label" for="issue-location" data-i18n="issue.loc.label">Location <span class="required">*</span></label>
+          <input id="issue-location" type="text" class="form-input"
+            placeholder="Where is the issue? (address or intersection)"
+            aria-label="Issue location" aria-required="true" required />
+        </div>
+        <div class="form-group" style="margin-bottom:16px">
+          <label class="form-label" for="issue-description" data-i18n="issue.desc.label">Description</label>
+          <textarea id="issue-description" class="form-textarea" rows="4"
+            placeholder="Describe the issue..."
+            aria-label="Issue description"></textarea>
+        </div>
+        <div class="form-group" style="margin-bottom:20px">
+          <label class="form-label" data-i18n="issue.photo.label">Photo <span style="font-weight:400;color:var(--navy-600)">(optional)</span></label>
+          <div class="issue-photo-drop" id="issue-photo-drop"
+            onclick="document.getElementById('issue-photo-input').click()"
+            role="button" tabindex="0"
+            aria-label="Upload a photo of the issue">
+            <span data-lucide="upload" class="w-8 h-8"></span>
+            <p data-i18n="issue.photo.hint">Drag and drop a photo here, or browse</p>
+            <input id="issue-photo-input" type="file" accept="image/*" class="hidden"
+              onchange="handleIssuePhoto(event)" aria-label="Choose photo" />
+          </div>
+          <div id="issue-photo-name" class="issue-photo-name hidden"></div>
+        </div>
+        <button type="button" onclick="submitIssueReport()" class="form-submit-btn" aria-label="Submit issue report">
+          <span data-lucide="send" class="w-5 h-5"></span>
+          <span data-i18n="issue.submit">Submit Report</span>
+        </button>
+      </form>
+    </div>
+  </div>
+</div>
+
+<!-- News Detail Modal -->
+<div id="news-detail-modal" class="modal-overlay hidden" role="dialog" aria-modal="true" aria-labelledby="news-detail-heading" onclick="closeNewsDetailModal(event)">
+  <div class="modal-box" style="max-width:780px;padding:0;overflow:hidden">
+    <button onclick="closeNewsDetailModalDirect()" class="modal-close" aria-label="Close article">
+      <span data-lucide="x" class="w-5 h-5"></span>
+    </button>
+    <div id="news-detail-content"></div>
+  </div>
+</div>
+
+<!-- Story Submission Modal -->
+<div id="story-submit-modal" class="modal-overlay hidden" role="dialog" aria-modal="true" aria-labelledby="story-submit-title" onclick="closeStorySubmitModal(event)">
+  <div class="modal-box" style="max-width:560px">
+    <button onclick="closeStorySubmitModalDirect()" class="modal-close" aria-label="Close">
+      <span data-lucide="x" class="w-5 h-5"></span>
+    </button>
+    <div class="modal-body">
+      <div style="display:flex;align-items:center;gap:10px;margin-bottom:20px">
+        <div class="login-modal-avatar" style="width:44px;height:44px;font-size:20px">✍️</div>
+        <div>
+          <h2 id="story-submit-title" style="font-size:1.2rem;font-weight:800;color:var(--navy);margin:0">Write a Story</h2>
+          <p style="font-size:13px;color:var(--navy-600);margin:2px 0 0">Share something meaningful happening in Harrisonburg</p>
+        </div>
+      </div>
+      <form id="story-submit-form" novalidate>
+        <div class="form-group" style="margin-bottom:14px">
+          <label class="form-label" for="story-title-input">Headline <span class="required">*</span></label>
+          <input id="story-title-input" type="text" class="form-input" placeholder="What's your story about?" maxlength="120" aria-required="true" />
+        </div>
+        <div class="form-group" style="margin-bottom:14px">
+          <label class="form-label" for="story-category-select">Category</label>
+          <select id="story-category-select" class="form-input" aria-label="Story category">
+            <option value="Community">Community</option>
+            <option value="Government">Government</option>
+            <option value="Health">Health</option>
+            <option value="Education">Education</option>
+            <option value="Food">Food</option>
+            <option value="Housing">Housing</option>
+            <option value="Environment">Environment</option>
+          </select>
+        </div>
+        <div class="form-group" style="margin-bottom:20px">
+          <label class="form-label" for="story-body-input">Your Story <span class="required">*</span></label>
+          <textarea id="story-body-input" class="form-textarea" rows="6"
+            placeholder="Tell the community what's happening…" aria-required="true"></textarea>
+        </div>
+        <button type="button" onclick="submitStory()" class="form-submit-btn" aria-label="Submit your story">
+          <span data-lucide="send" class="w-5 h-5"></span>
+          Submit Story
+        </button>
+      </form>
+    </div>
+  </div>
+</div>
+
+<!-- Donate Modal -->
+<div id="donate-modal" class="modal-overlay hidden" role="dialog" aria-modal="true" aria-labelledby="donate-modal-heading" onclick="closeDonateModal(event)">
+  <div class="modal-box" style="max-width:min(95vw,460px)">
+    <button onclick="closeDonateModalDirect()" class="modal-close" aria-label="Close">
+      <span data-lucide="x" class="w-5 h-5"></span>
+    </button>
+    <div class="modal-body">
+
+      <!-- Step 1: Amount Selection -->
+      <div id="donate-step-1">
+        <div style="text-align:center;margin-bottom:20px">
+          <div class="login-modal-avatar" style="background:linear-gradient(135deg,#EF4444,#F97316);color:#fff;width:52px;height:52px;font-size:24px">❤</div>
+          <h2 id="donate-modal-heading" style="font-size:1.15rem;font-weight:800;color:var(--navy);margin:12px 0 2px">Make a Donation</h2>
+          <p id="donate-modal-title" style="font-size:14px;font-weight:600;color:var(--teal);margin:0 0 2px"></p>
+          <p id="donate-modal-org" style="font-size:12px;color:var(--navy-600);margin:0"></p>
+        </div>
+        <!-- Preset chips -->
+        <p style="font-size:13px;font-weight:600;color:var(--navy);margin:0 0 10px">Choose an amount</p>
+        <div class="donate-chips-row" role="group" aria-label="Preset donation amounts">
+          <button class="donate-chip" data-amount="5"  onclick="selectDonateChip(5)">$5</button>
+          <button class="donate-chip" data-amount="10" onclick="selectDonateChip(10)">$10</button>
+          <button class="donate-chip active" data-amount="25" onclick="selectDonateChip(25)">$25</button>
+          <button class="donate-chip" data-amount="50" onclick="selectDonateChip(50)">$50</button>
+          <button class="donate-chip" data-amount="100" onclick="selectDonateChip(100)">$100</button>
+        </div>
+        <div class="form-group" style="margin:14px 0 20px">
+          <label class="form-label" for="donate-custom-input">Or enter a custom amount ($)</label>
+          <input id="donate-custom-input" type="number" min="1" step="1" class="form-input"
+            placeholder="e.g. 75" oninput="onCustomDonateInput()" aria-label="Custom donation amount" />
+        </div>
+        <button type="button" onclick="proceedToPayment()" class="form-submit-btn donate-confirm-btn" aria-label="Proceed to payment">
+          <span data-lucide="heart" class="w-5 h-5"></span>
+          Donate Now
+        </button>
+      </div>
+
+      <!-- Step 2: Payment Form -->
+      <div id="donate-step-2" class="hidden">
+        <div style="text-align:center;margin-bottom:18px">
+          <div class="login-modal-avatar" style="background:linear-gradient(135deg,#14B8A6,#0D9488);color:#fff;width:52px;height:52px">
+            <span data-lucide="credit-card" class="w-6 h-6"></span>
+          </div>
+          <h2 style="font-size:1.1rem;font-weight:800;color:var(--navy);margin:12px 0 2px">Payment Information</h2>
+          <p id="donate-payment-amount" style="font-size:14px;font-weight:700;color:var(--teal);margin:0"></p>
+        </div>
+        <div id="donate-payment-error" class="hidden" style="background:rgba(239,68,68,.08);border:1px solid rgba(239,68,68,.2);border-radius:8px;padding:10px 14px;font-size:13px;color:#EF4444;margin-bottom:14px"></div>
+        <div class="form-group">
+          <label class="form-label" for="pay-name">Cardholder Name</label>
+          <input id="pay-name" type="text" class="form-input" placeholder="Jane Smith" autocomplete="cc-name" />
+        </div>
+        <div class="form-group">
+          <label class="form-label" for="pay-card">Card Number</label>
+          <input id="pay-card" type="text" class="form-input" placeholder="1234 5678 9012 3456" maxlength="19" oninput="formatCardNumber(this)" autocomplete="cc-number" />
+        </div>
+        <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px">
+          <div class="form-group" style="margin:0">
+            <label class="form-label" for="pay-exp">Expiry</label>
+            <input id="pay-exp" type="text" class="form-input" placeholder="MM/YY" maxlength="5" oninput="formatExpiry(this)" autocomplete="cc-exp" />
+          </div>
+          <div class="form-group" style="margin:0">
+            <label class="form-label" for="pay-cvv">CVV</label>
+            <input id="pay-cvv" type="password" class="form-input" placeholder="•••" maxlength="4" autocomplete="cc-csc" />
+          </div>
+        </div>
+        <div class="form-group" style="margin-top:10px">
+          <label class="form-label" for="pay-zip">ZIP Code</label>
+          <input id="pay-zip" type="text" class="form-input" placeholder="22801" maxlength="5" autocomplete="postal-code" />
+        </div>
+        <button type="button" onclick="completeDonation()" class="form-submit-btn donate-confirm-btn" style="margin-top:16px" aria-label="Complete donation">
+          <span data-lucide="lock" class="w-4 h-4"></span>
+          Complete Donation
+        </button>
+        <button type="button" onclick="backToAmount()" style="display:block;width:100%;text-align:center;margin-top:10px;font-size:13px;color:var(--teal);background:none;border:none;cursor:pointer">← Back</button>
+        <p style="font-size:11px;text-align:center;color:var(--navy-600);margin-top:12px;line-height:1.5">
+          This is a demonstration project for the TSA Webmaster Competition. No real payment is processed and no financial data is stored or transmitted.
+        </p>
+      </div>
+
+      <!-- Step 3: Processing -->
+      <div id="donate-step-3" class="hidden" style="text-align:center;padding:32px 0">
+        <div class="ai-thinking-dots" style="justify-content:center;margin-bottom:16px">
+          <span></span><span></span><span></span>
+        </div>
+        <p style="font-size:14px;font-weight:600;color:var(--navy-600)">Processing your donation…</p>
+      </div>
+
+      <!-- Step 4: Success -->
+      <div id="donate-step-4" class="hidden" style="text-align:center;padding:32px 0">
+        <div style="width:64px;height:64px;background:linear-gradient(135deg,#10B981,#059669);border-radius:50%;display:flex;align-items:center;justify-content:center;margin:0 auto 16px">
+          <span data-lucide="check" style="width:32px;height:32px;color:white"></span>
+        </div>
+        <h3 id="donate-success-msg" style="font-size:1.1rem;font-weight:800;color:var(--navy);margin:0 0 8px"></h3>
+        <p id="donate-success-title" style="font-size:13px;color:var(--navy-600);margin:0 0 20px"></p>
+        <button onclick="closeDonateModalDirect()" class="form-submit-btn" aria-label="Done">Done</button>
+      </div>
+
+    </div>
+  </div>
+</div>
+
+<!-- Create Fundraiser Modal -->
+<div id="create-fundraiser-modal" class="modal-overlay hidden" role="dialog" aria-modal="true" aria-labelledby="create-fundraiser-title" onclick="closeCreateFundraiserModal(event)">
+  <div class="modal-box" style="max-width:540px">
+    <button onclick="closeCreateFundraiserModalDirect()" class="modal-close" aria-label="Close">
+      <span data-lucide="x" class="w-5 h-5"></span>
+    </button>
+    <div class="modal-body">
+      <div style="display:flex;align-items:center;gap:10px;margin-bottom:20px">
+        <div class="login-modal-avatar" style="width:44px;height:44px;font-size:20px">🚀</div>
+        <div>
+          <h2 id="create-fundraiser-title" style="font-size:1.2rem;font-weight:800;color:var(--navy);margin:0">Start a Fundraiser</h2>
+          <p style="font-size:13px;color:var(--navy-600);margin:2px 0 0">Rally the community behind a cause you care about</p>
+        </div>
+      </div>
+      <form id="create-fundraiser-form" novalidate>
+        <div class="form-group" style="margin-bottom:14px">
+          <label class="form-label" for="fundraiser-title-input">Fundraiser Title <span class="required">*</span></label>
+          <input id="fundraiser-title-input" type="text" class="form-input" placeholder="What are you raising funds for?" maxlength="100" aria-required="true" />
+        </div>
+        <div class="form-group" style="margin-bottom:14px">
+          <label class="form-label" for="fundraiser-cat-select">Category</label>
+          <select id="fundraiser-cat-select" class="form-input" aria-label="Fundraiser category">
+            <option>Community</option>
+            <option>Education</option>
+            <option>Food</option>
+            <option>Health</option>
+            <option>Housing</option>
+            <option>Parks</option>
+          </select>
+        </div>
+        <div class="form-group" style="margin-bottom:14px">
+          <label class="form-label" for="fundraiser-goal-input">Funding Goal ($) <span class="required">*</span></label>
+          <input id="fundraiser-goal-input" type="number" min="100" step="100" class="form-input" placeholder="e.g. 5000" aria-required="true" />
+        </div>
+        <div class="form-group" style="margin-bottom:20px">
+          <label class="form-label" for="fundraiser-desc-input">Description <span class="required">*</span></label>
+          <textarea id="fundraiser-desc-input" class="form-textarea" rows="4"
+            placeholder="Describe your project and how the funds will be used…" aria-required="true"></textarea>
+        </div>
+        <button type="button" onclick="submitFundraiser()" class="form-submit-btn" aria-label="Submit fundraiser">
+          <span data-lucide="send" class="w-5 h-5"></span>
+          Submit Fundraiser
+        </button>
+      </form>
+    </div>
+  </div>
+</div>
+
+<!-- Calendar Dialog -->
+<div id="calendar-dialog" class="cal-dialog-overlay hidden" role="dialog" aria-modal="true" aria-label="Add to calendar" onclick="if(event.target===this)dismissCalendarDialog()"></div>
+
+<!-- Toast Notification -->
+<div id="toast" class="toast hidden" role="alert" aria-live="assertive" aria-atomic="true"></div>
+
+<!-- Three.js for 3D World Explorer -->
+<script src="https://cdn.jsdelivr.net/npm/three@0.128.0/build/three.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/three@0.128.0/examples/js/controls/PointerLockControls.js"></script>
+
+<!-- ═══════════════════════════════════════════════════════
+     FLOATING AI CHATBOT FAB
+═══════════════════════════════════════════════════════ -->
+<!-- Chat Panel -->
+<div id="chat-panel" class="chat-panel hidden" role="dialog" aria-label="Community Assistant" aria-modal="true">
+  <!-- Header -->
+  <div class="chat-header">
+    <div class="chat-header-icon" aria-hidden="true">
+      <span data-lucide="sparkles" class="w-4 h-4"></span>
+    </div>
+    <div class="chat-header-text">
+      <div class="chat-header-title">Community Assistant</div>
+      <div class="chat-header-sub">Ask me anything about Harrisonburg resources</div>
+    </div>
+    <button onclick="closeChatPanel()" class="chat-header-close" aria-label="Close chat">
+      <span data-lucide="x" class="w-4 h-4"></span>
+    </button>
+  </div>
+  <!-- Messages -->
+  <div id="chat-messages" class="chat-messages" role="log" aria-live="polite" aria-label="Chat messages">
+    <!-- Welcome message injected by JS -->
+  </div>
+  <!-- Input -->
+  <div class="chat-input-bar">
+    <input id="chat-input" class="chat-input" type="text" placeholder="Type a message..." aria-label="Type your message" maxlength="300" />
+    <button id="chat-send-btn" class="chat-send-btn" onclick="chatSend()" aria-label="Send message">
+      <span data-lucide="send" class="w-4 h-4"></span>
+    </button>
+  </div>
+</div>
+
+<!-- FAB Button -->
+<button id="chat-fab" class="chat-fab btn-pulse" onclick="toggleChatPanel()" aria-label="Open community assistant" aria-expanded="false">
+  <span id="chat-fab-icon" data-lucide="message-circle" class="w-6 h-6"></span>
+</button>
+
+<!-- Data scripts -->
+<script src="data/resources.js"></script>
+<script src="data/extra-content.js"></script>
+<script src="app.js"></script>
+
+<!-- ── ConnectHBG Feature Enhancements ── -->
+<script src="features/smart-map.js"></script>
+<script src="features/ai-match.js"></script>
+<script src="features/premium-ux.js"></script>
+<script src="features/government-crisis.js"></script>
+<script src="features/news-donate.js"></script>
+<script src="features/extras.js"></script>
+
+<!-- Chatbot + Donation Flow -->
+<script src="chatbot_donate.js"></script>
+
+
+</body>
+</html>

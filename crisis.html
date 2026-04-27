@@ -1,0 +1,702 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Crisis Resources — ConnectHBG</title>
+  <meta name="description" content="Crisis and emergency resources for Harrisonburg residents. Free, confidential hotlines for mental health, domestic violence, housing, food, and more." />
+
+  <!-- Fonts -->
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&display=swap" rel="stylesheet" />
+
+  <!-- Tailwind CDN -->
+  <script src="https://cdn.tailwindcss.com"></script>
+
+  <!-- Leaflet Map -->
+  <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
+  <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+
+  <!-- Leaflet MarkerCluster -->
+  <link rel="stylesheet" href="https://unpkg.com/leaflet.markercluster@1.5.3/dist/MarkerCluster.css" />
+  <link rel="stylesheet" href="https://unpkg.com/leaflet.markercluster@1.5.3/dist/MarkerCluster.Default.css" />
+  <script src="https://unpkg.com/leaflet.markercluster@1.5.3/dist/leaflet.markercluster.js"></script>
+
+  <!-- Leaflet Heat -->
+  <script src="https://unpkg.com/leaflet.heat@0.2.0/dist/leaflet-heat.js"></script>
+
+  <!-- ECharts + ECharts-GL -->
+  <script src="https://cdn.jsdelivr.net/npm/echarts@5/dist/echarts.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/echarts-gl@2/dist/echarts-gl.min.js"></script>
+
+  <!-- AOS scroll animations -->
+  <link href="https://unpkg.com/aos@2.3.1/dist/aos.css" rel="stylesheet" />
+  <script src="https://unpkg.com/aos@2.3.1/dist/aos.js"></script>
+
+  <!-- Lucide Icons -->
+  <script src="https://unpkg.com/lucide@latest"></script>
+
+  <!-- Custom Styles -->
+  <link rel="stylesheet" href="styles.css" />
+
+  <script>
+    tailwind.config = {
+      theme: {
+        extend: {
+          colors: {
+            navy: { DEFAULT: '#0F172A', 800: '#1E293B', 700: '#334155', 600: '#475569' },
+            teal: { DEFAULT: '#14B8A6', light: '#5EEAD4', dark: '#0D9488' },
+            purple: { DEFAULT: '#8B5CF6', light: '#C4B5FD', dark: '#7C3AED' }
+          },
+          fontFamily: { sans: ['Inter', 'sans-serif'] }
+        }
+      }
+    }
+  </script>
+</head>
+
+<body class="font-sans bg-slate-50 text-navy antialiased" id="app-body">
+
+<!-- ═══════════════════════════════════════════════════════
+     SKIP LINK
+═══════════════════════════════════════════════════════ -->
+<a href="#main-content" class="skip-link">Skip to main content</a>
+
+<!-- ═══════════════════════════════════════════════════════
+     ACCESSIBILITY TOOLBAR
+═══════════════════════════════════════════════════════ -->
+<div id="a11y-bar" class="a11y-bar" role="toolbar" aria-label="Accessibility tools">
+  <button id="a11y-toggle-btn" class="a11y-toggle-btn" onclick="toggleA11yBar()" title="Accessibility options" aria-label="Toggle accessibility options" aria-expanded="false">
+    <span data-lucide="accessibility" class="w-5 h-5"></span>
+  </button>
+  <div id="a11y-controls" class="a11y-controls" aria-hidden="true">
+    <span class="a11y-label">Accessibility</span>
+    <button onclick="increaseFontSize()" title="Increase text size" aria-label="Increase font size">
+      <span class="font-bold text-xs">A+</span>
+    </button>
+    <button onclick="decreaseFontSize()" title="Decrease text size" aria-label="Decrease font size">
+      <span class="text-xs">A-</span>
+    </button>
+    <button onclick="toggleTTS()" title="Text to speech" id="btn-tts" aria-pressed="false">
+      <span data-lucide="volume-2" class="w-4 h-4"></span>
+    </button>
+  </div>
+</div>
+
+<!-- ═══════════════════════════════════════════════════════
+     ANNOUNCEMENT BANNER
+═══════════════════════════════════════════════════════ -->
+<div id="announcement-banner" class="announcement-banner" role="banner">
+  <div class="announcement-inner">
+    <span data-lucide="megaphone" class="w-4 h-4 flex-shrink-0"></span>
+    <div id="announcement-text" class="announcement-ticker"></div>
+  </div>
+  <button onclick="document.getElementById('announcement-banner').style.display='none'" aria-label="Dismiss announcement">
+    <span data-lucide="x" class="w-4 h-4"></span>
+  </button>
+</div>
+
+<!-- ═══════════════════════════════════════════════════════
+     NAVIGATION
+═══════════════════════════════════════════════════════ -->
+<nav id="navbar" class="navbar" role="navigation" aria-label="Main navigation">
+  <div class="nav-inner">
+    <!-- Logo -->
+    <a href="index.html" class="nav-logo" aria-label="ConnectHBG Home">
+      <div class="logo-icon">
+        <span data-lucide="map-pin" class="w-5 h-5"></span>
+      </div>
+      <span class="logo-text">Connect<span class="text-teal">HBG</span></span>
+    </a>
+
+    <!-- Desktop Nav Links -->
+    <div class="nav-links" role="list">
+      <a href="index.html#news" class="nav-link" role="listitem">News</a>
+      <a href="index.html#directory" class="nav-link" role="listitem">Directory</a>
+      <a href="index.html#calendar" class="nav-link" role="listitem">Events</a>
+      <a href="index.html#donate" class="nav-link" role="listitem">Donate</a>
+      <a href="index.html#stories" class="nav-link" role="listitem">Stories</a>
+      <a href="index.html#favorites" class="nav-link nav-link-fav" role="listitem">
+        <span data-lucide="heart" class="w-4 h-4"></span>
+        Favorites
+        <span id="fav-count-badge" class="fav-count-badge hidden">0</span>
+      </a>
+      <a href="government.html" class="nav-link" role="listitem">Government</a>
+      <a href="crisis.html" class="nav-link nav-link-crisis nav-link-active-crisis" role="listitem" style="background:rgba(239,68,68,.12)" aria-label="Crisis resources — emergency help available" aria-current="page">Crisis</a>
+      <a href="references.html" class="nav-link" role="listitem">References</a>
+    </div>
+
+    <!-- Nav Actions -->
+    <div class="nav-actions">
+      <button onclick="toggleDark()" class="icon-btn" title="Toggle dark mode" aria-label="Toggle dark mode" id="dark-toggle">
+        <span data-lucide="moon" class="w-5 h-5" id="dark-icon"></span>
+      </button>
+      <button onclick="startVoice()" class="icon-btn" title="Voice search" aria-label="Voice search" id="voice-btn">
+        <span data-lucide="mic" class="w-5 h-5"></span>
+      </button>
+      <button onclick="openLoginModal()" class="btn-primary-sm">
+        <span data-lucide="user" class="w-4 h-4"></span>
+        Sign In
+      </button>
+      <button id="mobile-menu-btn" class="icon-btn md:hidden" onclick="toggleMobileMenu()" aria-label="Open menu" aria-expanded="false">
+        <span data-lucide="menu" class="w-5 h-5"></span>
+      </button>
+    </div>
+  </div>
+
+  <!-- Mobile Menu -->
+  <div id="mobile-menu" class="mobile-menu hidden" role="menu">
+    <a href="index.html#news" class="mobile-link" onclick="toggleMobileMenu()">📰 News</a>
+    <a href="index.html#directory" class="mobile-link" onclick="toggleMobileMenu()">Directory</a>
+    <a href="index.html#calendar" class="mobile-link" onclick="toggleMobileMenu()">Events</a>
+    <a href="index.html#donate" class="mobile-link" onclick="toggleMobileMenu()">❤ Donate</a>
+    <a href="index.html#stories" class="mobile-link" onclick="toggleMobileMenu()">Stories</a>
+    <a href="index.html#favorites" class="mobile-link" onclick="toggleMobileMenu()">❤ Favorites</a>
+    <a href="government.html" class="mobile-link" onclick="toggleMobileMenu()">🏛 Government</a>
+    <a href="crisis.html" class="mobile-link mobile-link-crisis" onclick="toggleMobileMenu()">Crisis — Emergency Help</a>
+    <a href="references.html" class="mobile-link" onclick="toggleMobileMenu()">📋 References</a>
+    <a href="index.html#submit" class="mobile-link" onclick="toggleMobileMenu()">Submit</a>
+    <a href="index.html#dashboard" class="mobile-link" onclick="toggleMobileMenu()">Dashboard</a>
+  </div>
+</nav>
+
+<!-- ═══════════════════════════════════════════════════════
+     MAIN CONTENT
+═══════════════════════════════════════════════════════ -->
+<main id="main-content">
+
+<!-- ───────────────────────────────────────────────────────
+     CRISIS RESOURCES
+─────────────────────────────────────────────────────── -->
+<section class="section-wrapper bg-white" id="crisis" aria-labelledby="crisis-heading">
+  <div class="section-inner">
+
+    <!-- 911 Emergency Banner -->
+    <a href="tel:911" class="crisis-emergency-banner" aria-label="Call 911 for emergencies" data-aos="fade-up">
+      <span data-lucide="phone-call" style="display:inline-block;vertical-align:middle;width:20px;height:20px;margin-right:8px;margin-bottom:2px"></span>
+      🚨 <strong>IN A LIFE-THREATENING EMERGENCY — CALL 911 IMMEDIATELY</strong>
+      <span data-lucide="phone-call" style="display:inline-block;vertical-align:middle;width:20px;height:20px;margin-left:8px;margin-bottom:2px"></span>
+    </a>
+
+    <!-- Section Header -->
+    <div class="crisis-header section-header" data-aos="fade-up">
+      <div class="section-tag" style="background:rgba(239,68,68,.08);color:#EF4444;border-color:rgba(239,68,68,.18)">
+        <span data-lucide="heart-handshake" class="w-4 h-4"></span> Support
+      </div>
+      <h2 id="crisis-heading" class="crisis-title">You Are Not Alone</h2>
+      <p class="section-subtitle" style="max-width:640px">
+        Free, confidential crisis resources available 24/7. Trained counselors are standing by to help. There is no shame in asking for help — it's the bravest thing you can do.
+      </p>
+    </div>
+
+    <!-- Crisis Resources (rendered by government-crisis.js) -->
+    <div id="crisis-resources" aria-label="Crisis and emergency resources" aria-live="polite"></div>
+
+    <!-- Footer Note -->
+    <p class="crisis-footer-note" data-aos="fade-up" style="margin-top:48px">
+      <span data-lucide="info" style="display:inline-block;vertical-align:middle;width:16px;height:16px;margin-right:6px"></span>
+      All resources listed are free and confidential. For immediate life-threatening emergencies, always call <strong><a href="tel:911" style="color:inherit">911</a></strong>. If you or someone you know is in danger, do not wait — call now.
+    </p>
+
+  </div>
+</section>
+
+<!-- ───────────────────────────────────────────────────────
+     FOOTER
+─────────────────────────────────────────────────────── -->
+<footer class="footer" role="contentinfo">
+  <div class="footer-inner">
+    <div class="footer-brand">
+      <div class="logo-icon-sm">
+        <span data-lucide="map-pin" class="w-4 h-4"></span>
+      </div>
+      <span class="logo-text-sm">Connect<span class="text-teal">HBG</span></span>
+      <p class="footer-tagline">Connecting Harrisonburg to the resources that matter most.</p>
+    </div>
+    <div class="footer-links">
+      <div class="footer-col">
+        <h4>Explore</h4>
+        <a href="index.html#directory">Resource Directory</a>
+        <a href="index.html#calendar">Community Calendar</a>
+        <a href="index.html#stories">Community Stories</a>
+        <a href="government.html">City Government</a>
+        <a href="crisis.html">Crisis Resources</a>
+        <a href="references.html">References</a>
+      </div>
+      <div class="footer-col">
+        <h4>Get Involved</h4>
+        <a href="index.html#submit">Submit a Resource</a>
+        <a href="index.html#calendar">Volunteer</a>
+      </div>
+      <div class="footer-col">
+        <h4>Accessibility</h4>
+        <button onclick="increaseFontSize()">Larger Text</button>
+        <button onclick="decreaseFontSize()">Smaller Text</button>
+        <button onclick="toggleTTS()">Text to Speech</button>
+        <button onclick="toggleDark()">Toggle Dark Mode</button>
+      </div>
+      <div class="footer-col">
+        <h4 class="footer-contact-heading">Contact</h4>
+        <div class="footer-contact-row">
+          <span data-lucide="mail" class="footer-contact-icon"></span>
+          <a href="mailto:info@connecthbg.org" class="footer-contact-link">info@connecthbg.org</a>
+        </div>
+        <div class="footer-contact-row">
+          <span data-lucide="phone" class="footer-contact-icon"></span>
+          <a href="tel:+15404344436" class="footer-contact-link">(540) 434-4436</a>
+        </div>
+        <div class="footer-contact-row">
+          <span data-lucide="map-pin" class="footer-contact-icon"></span>
+          <span class="footer-contact-text">409 S Main St, Harrisonburg, VA 22801</span>
+        </div>
+        <div class="footer-contact-row">
+          <span data-lucide="clock" class="footer-contact-icon"></span>
+          <span class="footer-contact-text">Mon – Fri, 8 AM – 5 PM</span>
+        </div>
+      </div>
+    </div>
+  </div>
+  <div class="footer-bottom">
+    <p>© 2026 ConnectHBG. Built for the TSA Webmaster Competition.</p>
+  </div>
+</footer>
+
+</main>
+
+<!-- ═══════════════════════════════════════════════════════
+     MODALS
+═══════════════════════════════════════════════════════ -->
+
+<!-- Story Detail Modal -->
+<div id="story-modal" class="modal-overlay hidden" role="dialog" aria-modal="true" aria-labelledby="story-modal-title" onclick="closeStoryModal(event)">
+  <div class="modal-box" style="max-width:740px">
+    <button onclick="closeStoryModal()" class="modal-close" aria-label="Close story">
+      <span data-lucide="x" class="w-5 h-5"></span>
+    </button>
+    <div id="story-modal-content"></div>
+  </div>
+</div>
+
+<!-- Resource Detail Modal -->
+<div id="resource-modal" class="modal-overlay hidden" role="dialog" aria-modal="true" aria-labelledby="modal-title" onclick="closeModal(event)">
+  <div class="modal-box">
+    <button onclick="closeResourceModal()" class="modal-close" aria-label="Close modal">
+      <span data-lucide="x" class="w-5 h-5"></span>
+    </button>
+    <div id="modal-content"></div>
+  </div>
+</div>
+
+<!-- Login Modal -->
+<div id="login-modal" class="modal-overlay hidden" role="dialog" aria-modal="true" aria-labelledby="login-modal-title" onclick="closeLoginModal(event)">
+  <div class="modal-box max-w-md" style="overflow:visible">
+    <button onclick="closeLoginModal()" class="modal-close" aria-label="Close login modal">
+      <span data-lucide="x" class="w-5 h-5"></span>
+    </button>
+    <div style="padding:32px 32px 28px">
+      <div style="text-align:center;margin-bottom:24px">
+        <div class="login-modal-avatar">
+          <span data-lucide="user-circle-2" class="w-10 h-10"></span>
+        </div>
+        <h2 id="login-modal-title" style="font-size:1.5rem;font-weight:800;color:var(--navy);margin:12px 0 4px">Welcome to ConnectHBG</h2>
+        <p style="color:var(--navy-600);font-size:13px">Sign in or create an account to save favorites and leave reviews</p>
+      </div>
+      <div class="login-tabs" role="tablist" aria-label="Sign in or register">
+        <button id="tab-signin" class="login-tab active" onclick="switchLoginTab('signin')" role="tab" aria-selected="true" aria-controls="panel-signin">Sign In</button>
+        <button id="tab-register" class="login-tab" onclick="switchLoginTab('register')" role="tab" aria-selected="false" aria-controls="panel-register">Create Account</button>
+      </div>
+      <div id="panel-signin" role="tabpanel" aria-labelledby="tab-signin">
+        <div id="login-error" class="login-error hidden" role="alert"></div>
+        <div style="margin-bottom:14px">
+          <label style="font-size:12px;font-weight:700;color:var(--navy-600);text-transform:uppercase;letter-spacing:.4px;display:block;margin-bottom:6px">Username</label>
+          <input type="text" id="login-username" class="form-input" placeholder="Enter your username" aria-label="Username" autocomplete="username" />
+        </div>
+        <div style="margin-bottom:20px">
+          <label style="font-size:12px;font-weight:700;color:var(--navy-600);text-transform:uppercase;letter-spacing:.4px;display:block;margin-bottom:6px">Password</label>
+          <div style="position:relative">
+            <input type="password" id="login-password" class="form-input" placeholder="Enter your password" aria-label="Password" autocomplete="current-password" style="padding-right:44px" />
+            <button type="button" onclick="togglePasswordVis('login-password', this)" style="position:absolute;right:12px;top:50%;transform:translateY(-50%);color:var(--navy-600);background:none;border:none;cursor:pointer;display:flex;align-items:center" aria-label="Toggle password visibility">
+              <span data-lucide="eye" class="w-4 h-4"></span>
+            </button>
+          </div>
+        </div>
+        <button onclick="submitLogin()" class="form-submit-btn" style="margin-top:0">
+          <span data-lucide="log-in" class="w-5 h-5"></span>
+          Sign In
+        </button>
+        <div style="margin-top:16px;padding:12px 16px;background:rgba(20,184,166,.06);border-radius:10px;border:1px solid rgba(20,184,166,.12)">
+          <p style="font-size:11px;font-weight:700;color:var(--teal-dark);margin:0 0 6px;text-transform:uppercase;letter-spacing:.4px">Competition Judge Access</p>
+          <p style="font-size:12px;color:var(--navy-600);margin:0">Username: <strong>judge</strong> &nbsp;|&nbsp; Password: <strong>TSA2026!</strong></p>
+        </div>
+      </div>
+      <div id="panel-register" role="tabpanel" aria-labelledby="tab-register" class="hidden">
+        <div id="register-error" class="login-error hidden" role="alert"></div>
+        <div style="margin-bottom:14px">
+          <div style="margin-bottom:12px">
+            <label style="font-size:12px;font-weight:700;color:var(--navy-600);text-transform:uppercase;letter-spacing:.4px;display:block;margin-bottom:6px">Display Name</label>
+            <input type="text" id="reg-displayname" class="form-input" placeholder="Your name" aria-label="Display name" />
+          </div>
+          <div>
+            <label style="font-size:12px;font-weight:700;color:var(--navy-600);text-transform:uppercase;letter-spacing:.4px;display:block;margin-bottom:6px">Username</label>
+            <input type="text" id="reg-username" class="form-input" placeholder="Choose username" aria-label="Username" autocomplete="username" />
+          </div>
+        </div>
+        <div style="margin-bottom:12px">
+          <label style="font-size:12px;font-weight:700;color:var(--navy-600);text-transform:uppercase;letter-spacing:.4px;display:block;margin-bottom:6px">Password</label>
+          <input type="password" id="reg-password" class="form-input" placeholder="Create a password" aria-label="Password" autocomplete="new-password" />
+        </div>
+        <div style="margin-bottom:20px">
+          <label style="font-size:12px;font-weight:700;color:var(--navy-600);text-transform:uppercase;letter-spacing:.4px;display:block;margin-bottom:6px">Confirm Password</label>
+          <input type="password" id="reg-confirm" class="form-input" placeholder="Confirm password" aria-label="Confirm password" autocomplete="new-password" />
+        </div>
+        <button onclick="submitRegister()" class="form-submit-btn" style="margin-top:0">
+          <span data-lucide="user-plus" class="w-5 h-5"></span>
+          Create Account
+        </button>
+        <p style="font-size:11px;color:var(--navy-600);text-align:center;margin-top:14px">By creating an account you agree to our community guidelines.</p>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Account Dashboard Panel -->
+<div id="account-dashboard" class="account-panel hidden" role="dialog" aria-modal="true" aria-label="Account Dashboard">
+  <div class="account-panel-overlay" onclick="closeAccountDashboard()"></div>
+  <div class="account-panel-inner" role="document">
+    <div class="account-panel-scroll">
+      <div class="account-panel-header">
+        <h2 style="font-size:17px;font-weight:800;color:var(--navy)">My Account</h2>
+        <button onclick="closeAccountDashboard()" class="modal-close" style="position:static;float:none;margin:0" aria-label="Close account">
+          <span data-lucide="x" class="w-5 h-5"></span>
+        </button>
+      </div>
+      <div class="account-profile-card">
+        <div id="account-avatar" class="account-avatar">?</div>
+        <div class="account-profile-info">
+          <div id="account-displayname" class="account-name">—</div>
+          <div id="account-username-display" class="account-handle">@—</div>
+          <span id="account-role-badge" class="account-role-badge">Member</span>
+        </div>
+        <button onclick="signOut()" class="account-signout-btn" title="Sign out">
+          <span data-lucide="log-out" class="w-4 h-4"></span>
+        </button>
+      </div>
+      <div class="account-stats-row">
+        <div class="account-stat"><span id="acc-events-count" class="account-stat-num">0</span><span class="account-stat-lbl">Registered</span></div>
+        <div class="account-stat"><span id="acc-favs-count" class="account-stat-num">0</span><span class="account-stat-lbl">Favorites</span></div>
+        <div class="account-stat"><span id="acc-reviews-count" class="account-stat-num">0</span><span class="account-stat-lbl">Reviews</span></div>
+        <div class="account-stat"><span id="acc-submissions-count" class="account-stat-num">0</span><span class="account-stat-lbl">Submitted</span></div>
+      </div>
+      <div class="account-section" id="acc-submissions-section" style="display:none">
+        <div class="account-section-header">
+          <h3 class="account-section-title"><span data-lucide="send" class="w-4 h-4"></span> My Submissions</h3>
+          <a href="index.html#submit" onclick="closeAccountDashboard()" class="account-section-link">Submit Resource</a>
+        </div>
+        <div id="account-submissions-list" class="account-events-list">
+          <p class="account-empty-msg">No submissions yet</p>
+        </div>
+      </div>
+      <div class="account-section">
+        <div class="account-section-header">
+          <h3 class="account-section-title"><span data-lucide="calendar-check" class="w-4 h-4"></span> Registered Events</h3>
+        </div>
+        <div id="account-events-list" class="account-events-list">
+          <p class="account-empty-msg">No events registered yet</p>
+        </div>
+      </div>
+      <div class="account-section">
+        <div class="account-section-header">
+          <h3 class="account-section-title"><span data-lucide="heart" class="w-4 h-4"></span> Saved Favorites</h3>
+          <a href="index.html#favorites" onclick="closeAccountDashboard()" class="account-section-link">View all</a>
+        </div>
+        <div id="account-favs-preview" class="account-favs-preview"></div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Issue Report Modal -->
+<div id="issue-modal" class="modal-overlay hidden" role="dialog" aria-modal="true" aria-labelledby="issue-modal-title" onclick="closeIssueModal(event)">
+  <div class="modal-box" style="max-width:540px">
+    <button onclick="closeIssueModalDirect()" class="modal-close" aria-label="Close modal">
+      <span data-lucide="x" class="w-5 h-5"></span>
+    </button>
+    <div class="modal-body">
+      <h2 id="issue-modal-title" style="font-size:1.25rem;font-weight:700;color:var(--navy);margin:0 0 24px">Report an Issue</h2>
+      <form id="issue-form" novalidate>
+        <div class="form-group" style="margin-bottom:16px">
+          <label class="form-label" for="issue-type">Issue Type <span class="required">*</span></label>
+          <select id="issue-type" class="form-input" aria-label="Issue type" aria-required="true" required>
+            <option value="">Select issue type</option>
+            <option>Pothole</option>
+            <option>Broken Streetlight</option>
+            <option>Fallen Tree</option>
+            <option>Graffiti</option>
+            <option>Sidewalk Damage</option>
+            <option>Other</option>
+          </select>
+        </div>
+        <div class="form-group" style="margin-bottom:16px">
+          <label class="form-label" for="issue-location">Location <span class="required">*</span></label>
+          <input id="issue-location" type="text" class="form-input" placeholder="Where is the issue? (address or intersection)" aria-label="Issue location" aria-required="true" required />
+        </div>
+        <div class="form-group" style="margin-bottom:16px">
+          <label class="form-label" for="issue-description">Description</label>
+          <textarea id="issue-description" class="form-textarea" rows="4" placeholder="Describe the issue..." aria-label="Issue description"></textarea>
+        </div>
+        <div class="form-group" style="margin-bottom:20px">
+          <label class="form-label">Photo <span style="font-weight:400;color:var(--navy-600)">(optional)</span></label>
+          <div class="issue-photo-drop" id="issue-photo-drop" onclick="document.getElementById('issue-photo-input').click()" role="button" tabindex="0" aria-label="Upload a photo of the issue">
+            <span data-lucide="upload" class="w-8 h-8"></span>
+            <p>Drag and drop a photo here, or browse</p>
+            <input id="issue-photo-input" type="file" accept="image/*" class="hidden" onchange="handleIssuePhoto(event)" aria-label="Choose photo" />
+          </div>
+          <div id="issue-photo-name" class="issue-photo-name hidden"></div>
+        </div>
+        <button type="button" onclick="submitIssueReport()" class="form-submit-btn" aria-label="Submit issue report">
+          <span data-lucide="send" class="w-5 h-5"></span>
+          Submit Report
+        </button>
+      </form>
+    </div>
+  </div>
+</div>
+
+<!-- News Detail Modal -->
+<div id="news-detail-modal" class="modal-overlay hidden" role="dialog" aria-modal="true" aria-labelledby="news-detail-heading" onclick="closeNewsDetailModal(event)">
+  <div class="modal-box" style="max-width:780px;padding:0;overflow:hidden">
+    <button onclick="closeNewsDetailModalDirect()" class="modal-close" aria-label="Close article">
+      <span data-lucide="x" class="w-5 h-5"></span>
+    </button>
+    <div id="news-detail-content"></div>
+  </div>
+</div>
+
+<!-- Story Submission Modal -->
+<div id="story-submit-modal" class="modal-overlay hidden" role="dialog" aria-modal="true" aria-labelledby="story-submit-title" onclick="closeStorySubmitModal(event)">
+  <div class="modal-box" style="max-width:560px">
+    <button onclick="closeStorySubmitModalDirect()" class="modal-close" aria-label="Close">
+      <span data-lucide="x" class="w-5 h-5"></span>
+    </button>
+    <div class="modal-body">
+      <div style="display:flex;align-items:center;gap:10px;margin-bottom:20px">
+        <div class="login-modal-avatar" style="width:44px;height:44px;font-size:20px">✍️</div>
+        <div>
+          <h2 id="story-submit-title" style="font-size:1.2rem;font-weight:800;color:var(--navy);margin:0">Write a Story</h2>
+          <p style="font-size:13px;color:var(--navy-600);margin:2px 0 0">Share something meaningful happening in Harrisonburg</p>
+        </div>
+      </div>
+      <form id="story-submit-form" novalidate>
+        <div class="form-group" style="margin-bottom:14px">
+          <label class="form-label" for="story-title-input">Headline <span class="required">*</span></label>
+          <input id="story-title-input" type="text" class="form-input" placeholder="What's your story about?" maxlength="120" aria-required="true" />
+        </div>
+        <div class="form-group" style="margin-bottom:14px">
+          <label class="form-label" for="story-category-select">Category</label>
+          <select id="story-category-select" class="form-input" aria-label="Story category">
+            <option value="Community">Community</option>
+            <option value="Government">Government</option>
+            <option value="Health">Health</option>
+            <option value="Education">Education</option>
+            <option value="Food">Food</option>
+            <option value="Housing">Housing</option>
+            <option value="Environment">Environment</option>
+          </select>
+        </div>
+        <div class="form-group" style="margin-bottom:20px">
+          <label class="form-label" for="story-body-input">Your Story <span class="required">*</span></label>
+          <textarea id="story-body-input" class="form-textarea" rows="6" placeholder="Tell the community what's happening…" aria-required="true"></textarea>
+        </div>
+        <button type="button" onclick="submitStory()" class="form-submit-btn" aria-label="Submit your story">
+          <span data-lucide="send" class="w-5 h-5"></span>
+          Submit Story
+        </button>
+      </form>
+    </div>
+  </div>
+</div>
+
+<!-- Donate Modal -->
+<div id="donate-modal" class="modal-overlay hidden" role="dialog" aria-modal="true" aria-labelledby="donate-modal-heading" onclick="closeDonateModal(event)">
+  <div class="modal-box" style="max-width:460px">
+    <button onclick="closeDonateModalDirect()" class="modal-close" aria-label="Close">
+      <span data-lucide="x" class="w-5 h-5"></span>
+    </button>
+    <div class="modal-body">
+      <div id="donate-step-1">
+        <div style="text-align:center;margin-bottom:20px">
+          <div class="login-modal-avatar" style="background:linear-gradient(135deg,#EF4444,#F97316);color:#fff;width:52px;height:52px;font-size:24px">❤</div>
+          <h2 id="donate-modal-heading" style="font-size:1.15rem;font-weight:800;color:var(--navy);margin:12px 0 2px">Make a Donation</h2>
+          <p id="donate-modal-title" style="font-size:14px;font-weight:600;color:var(--teal);margin:0 0 2px"></p>
+          <p id="donate-modal-org" style="font-size:12px;color:var(--navy-600);margin:0"></p>
+        </div>
+        <p style="font-size:13px;font-weight:600;color:var(--navy);margin:0 0 10px">Choose an amount</p>
+        <div class="donate-chips-row" role="group" aria-label="Preset donation amounts">
+          <button class="donate-chip" data-amount="5" onclick="selectDonateChip(5)">$5</button>
+          <button class="donate-chip" data-amount="10" onclick="selectDonateChip(10)">$10</button>
+          <button class="donate-chip active" data-amount="25" onclick="selectDonateChip(25)">$25</button>
+          <button class="donate-chip" data-amount="50" onclick="selectDonateChip(50)">$50</button>
+          <button class="donate-chip" data-amount="100" onclick="selectDonateChip(100)">$100</button>
+        </div>
+        <div class="form-group" style="margin:14px 0 20px">
+          <label class="form-label" for="donate-custom-input">Or enter a custom amount ($)</label>
+          <input id="donate-custom-input" type="number" min="1" step="1" class="form-input" placeholder="e.g. 75" oninput="onCustomDonateInput()" aria-label="Custom donation amount" />
+        </div>
+        <button type="button" onclick="proceedToPayment()" class="form-submit-btn donate-confirm-btn" aria-label="Proceed to payment">
+          <span data-lucide="heart" class="w-5 h-5"></span>
+          Donate Now
+        </button>
+      </div>
+      <div id="donate-step-2" class="hidden">
+        <div style="text-align:center;margin-bottom:18px">
+          <div class="login-modal-avatar" style="background:linear-gradient(135deg,#14B8A6,#0D9488);color:#fff;width:52px;height:52px">
+            <span data-lucide="credit-card" class="w-6 h-6"></span>
+          </div>
+          <h2 style="font-size:1.1rem;font-weight:800;color:var(--navy);margin:12px 0 2px">Payment Information</h2>
+          <p id="donate-payment-amount" style="font-size:14px;font-weight:700;color:var(--teal);margin:0"></p>
+        </div>
+        <div id="donate-payment-error" class="hidden" style="background:rgba(239,68,68,.08);border:1px solid rgba(239,68,68,.2);border-radius:8px;padding:10px 14px;font-size:13px;color:#EF4444;margin-bottom:14px"></div>
+        <div class="form-group">
+          <label class="form-label" for="pay-name">Cardholder Name</label>
+          <input id="pay-name" type="text" class="form-input" placeholder="Jane Smith" autocomplete="cc-name" />
+        </div>
+        <div class="form-group">
+          <label class="form-label" for="pay-card">Card Number</label>
+          <input id="pay-card" type="text" class="form-input" placeholder="1234 5678 9012 3456" maxlength="19" oninput="formatCardNumber(this)" autocomplete="cc-number" />
+        </div>
+        <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:10px">
+          <div class="form-group" style="margin:0">
+            <label class="form-label" for="pay-exp">Expiry</label>
+            <input id="pay-exp" type="text" class="form-input" placeholder="MM/YY" maxlength="5" oninput="formatExpiry(this)" autocomplete="cc-exp" />
+          </div>
+          <div class="form-group" style="margin:0">
+            <label class="form-label" for="pay-cvv">CVV</label>
+            <input id="pay-cvv" type="password" class="form-input" placeholder="•••" maxlength="4" autocomplete="cc-csc" />
+          </div>
+          <div class="form-group" style="margin:0">
+            <label class="form-label" for="pay-zip">ZIP</label>
+            <input id="pay-zip" type="text" class="form-input" placeholder="22801" maxlength="5" autocomplete="postal-code" />
+          </div>
+        </div>
+        <button type="button" onclick="completeDonation()" class="form-submit-btn donate-confirm-btn" style="margin-top:16px" aria-label="Complete donation">
+          <span data-lucide="lock" class="w-4 h-4"></span>
+          Complete Donation
+        </button>
+        <button type="button" onclick="backToAmount()" style="display:block;width:100%;text-align:center;margin-top:10px;font-size:13px;color:var(--teal);background:none;border:none;cursor:pointer">← Back</button>
+        <p style="font-size:11px;text-align:center;color:var(--navy-600);margin-top:12px;line-height:1.5">This is a demonstration project for the TSA Webmaster Competition. No real payment is processed.</p>
+      </div>
+      <div id="donate-step-3" class="hidden" style="text-align:center;padding:32px 0">
+        <div class="ai-thinking-dots" style="justify-content:center;margin-bottom:16px"><span></span><span></span><span></span></div>
+        <p style="font-size:14px;font-weight:600;color:var(--navy-600)">Processing your donation…</p>
+      </div>
+      <div id="donate-step-4" class="hidden" style="text-align:center;padding:32px 0">
+        <div style="width:64px;height:64px;background:linear-gradient(135deg,#10B981,#059669);border-radius:50%;display:flex;align-items:center;justify-content:center;margin:0 auto 16px">
+          <span data-lucide="check" style="width:32px;height:32px;color:white"></span>
+        </div>
+        <h3 id="donate-success-msg" style="font-size:1.1rem;font-weight:800;color:var(--navy);margin:0 0 8px"></h3>
+        <p id="donate-success-title" style="font-size:13px;color:var(--navy-600);margin:0 0 20px"></p>
+        <button onclick="closeDonateModalDirect()" class="form-submit-btn" aria-label="Done">Done</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Create Fundraiser Modal -->
+<div id="create-fundraiser-modal" class="modal-overlay hidden" role="dialog" aria-modal="true" aria-labelledby="create-fundraiser-title" onclick="closeCreateFundraiserModal(event)">
+  <div class="modal-box" style="max-width:540px">
+    <button onclick="closeCreateFundraiserModalDirect()" class="modal-close" aria-label="Close">
+      <span data-lucide="x" class="w-5 h-5"></span>
+    </button>
+    <div class="modal-body">
+      <div style="display:flex;align-items:center;gap:10px;margin-bottom:20px">
+        <div class="login-modal-avatar" style="width:44px;height:44px;font-size:20px">🚀</div>
+        <div>
+          <h2 id="create-fundraiser-title" style="font-size:1.2rem;font-weight:800;color:var(--navy);margin:0">Start a Fundraiser</h2>
+          <p style="font-size:13px;color:var(--navy-600);margin:2px 0 0">Rally the community behind a cause you care about</p>
+        </div>
+      </div>
+      <form id="create-fundraiser-form" novalidate>
+        <div class="form-group" style="margin-bottom:14px">
+          <label class="form-label" for="fundraiser-title-input">Fundraiser Title <span class="required">*</span></label>
+          <input id="fundraiser-title-input" type="text" class="form-input" placeholder="What are you raising funds for?" maxlength="100" aria-required="true" />
+        </div>
+        <div class="form-group" style="margin-bottom:14px">
+          <label class="form-label" for="fundraiser-cat-select">Category</label>
+          <select id="fundraiser-cat-select" class="form-input" aria-label="Fundraiser category">
+            <option>Community</option><option>Education</option><option>Food</option>
+            <option>Health</option><option>Housing</option><option>Parks</option>
+          </select>
+        </div>
+        <div class="form-group" style="margin-bottom:14px">
+          <label class="form-label" for="fundraiser-goal-input">Funding Goal ($) <span class="required">*</span></label>
+          <input id="fundraiser-goal-input" type="number" min="100" step="100" class="form-input" placeholder="e.g. 5000" aria-required="true" />
+        </div>
+        <div class="form-group" style="margin-bottom:20px">
+          <label class="form-label" for="fundraiser-desc-input">Description <span class="required">*</span></label>
+          <textarea id="fundraiser-desc-input" class="form-textarea" rows="4" placeholder="Describe your project and how the funds will be used…" aria-required="true"></textarea>
+        </div>
+        <button type="button" onclick="submitFundraiser()" class="form-submit-btn" aria-label="Submit fundraiser">
+          <span data-lucide="send" class="w-5 h-5"></span>
+          Submit Fundraiser
+        </button>
+      </form>
+    </div>
+  </div>
+</div>
+
+<!-- Calendar Dialog -->
+<div id="calendar-dialog" class="cal-dialog-overlay hidden" role="dialog" aria-modal="true" aria-label="Add to calendar" onclick="if(event.target===this)dismissCalendarDialog()"></div>
+
+<!-- Toast Notification -->
+<div id="toast" class="toast hidden" role="alert" aria-live="assertive" aria-atomic="true"></div>
+
+<!-- Three.js for 3D World Explorer -->
+<script src="https://cdn.jsdelivr.net/npm/three@0.128.0/build/three.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/three@0.128.0/examples/js/controls/PointerLockControls.js"></script>
+
+<!-- ═══════════════════════════════════════════════════════
+     FLOATING AI CHATBOT FAB
+═══════════════════════════════════════════════════════ -->
+<div id="chat-panel" class="chat-panel hidden" role="dialog" aria-label="Community Assistant" aria-modal="true">
+  <div class="chat-header">
+    <div class="chat-header-icon" aria-hidden="true">
+      <span data-lucide="sparkles" class="w-4 h-4"></span>
+    </div>
+    <div class="chat-header-text">
+      <div class="chat-header-title">Community Assistant</div>
+      <div class="chat-header-sub">Ask me anything about Harrisonburg resources</div>
+    </div>
+    <button onclick="closeChatPanel()" class="chat-header-close" aria-label="Close chat">
+      <span data-lucide="x" class="w-4 h-4"></span>
+    </button>
+  </div>
+  <div id="chat-messages" class="chat-messages" role="log" aria-live="polite" aria-label="Chat messages"></div>
+  <div class="chat-input-bar">
+    <input id="chat-input" class="chat-input" type="text" placeholder="Type a message..." aria-label="Type your message" maxlength="300" />
+    <button id="chat-send-btn" class="chat-send-btn" onclick="chatSend()" aria-label="Send message">
+      <span data-lucide="send" class="w-4 h-4"></span>
+    </button>
+  </div>
+</div>
+
+<button id="chat-fab" class="chat-fab btn-pulse" onclick="toggleChatPanel()" aria-label="Open community assistant" aria-expanded="false">
+  <span id="chat-fab-icon" data-lucide="message-circle" class="w-6 h-6"></span>
+</button>
+
+<!-- Data scripts -->
+<script src="data/resources.js"></script>
+<script src="data/extra-content.js"></script>
+<script src="app.js"></script>
+
+<!-- Feature Enhancements -->
+<script src="features/smart-map.js"></script>
+<script src="features/ai-match.js"></script>
+<script src="features/premium-ux.js"></script>
+<script src="features/government-crisis.js"></script>
+<script src="features/news-donate.js"></script>
+<script src="features/extras.js"></script>
+
+<!-- Chatbot + Donation Flow -->
+<script src="chatbot_donate.js"></script>
+</body>
+</html>
