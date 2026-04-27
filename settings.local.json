@@ -1,0 +1,8 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(wc -l /c/Users/abv_2/OneDrive/Desktop/Webmaster/*.css /c/Users/abv_2/OneDrive/Desktop/Webmaster/*.js)",
+      "PowerShell(node --version 2>&1)"
+    ]
+  }
+}
